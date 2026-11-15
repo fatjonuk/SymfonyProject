@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="fr">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>{% block title %}UGB Charpente{% endblock %}</title>
+        <meta name="description" content="{% block description %}UGB Charpente — Des structures solides, pour tous vos projets.{% endblock %}">
+        <meta name="theme-color" content="#0D1B3D">
+        <link rel="icon" type="image/svg+xml" href="{{ asset('images/logo/logo-ugb-charpente.svg') }}">
+        {% block stylesheets %}{% endblock %}
+        {% block javascripts %}
+            {% block importmap %}{{ importmap('app') }}{% endblock %}
+        {% endblock %}
+    </head>
+    <body class="{% block body_class %}{% endblock %}">
+        {% block body %}{% endblock %}
+    </body>
+</html>

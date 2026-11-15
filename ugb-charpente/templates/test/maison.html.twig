@@ -1,0 +1,62 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Maison 3D — page de test | UGB Charpente{% endblock %}
+
+{% block importmap %}{{ importmap(['app', 'scene-test']) }}{% endblock %}
+
+{% block body_class %}page-scene{% endblock %}
+
+{% block body %}
+<header class="barre">
+    <a class="barre__marque" href="{{ path('accueil') }}">
+        <img src="{{ asset('images/logo/logo-ugb-charpente.svg') }}" alt="" width="40" height="40">
+        <span>UGB <strong>Charpente</strong></span>
+    </a>
+    <span class="barre__etiquette">Page de test · Étape 1</span>
+</header>
+
+<main class="scene" id="scene" data-poster="{{ asset('images/maison-poster.webp') }}">
+    <h1 class="visuellement-masque">Maison 3D UGB Charpente : charpente traditionnelle, couverture, zinguerie, bardage et abri bois</h1>
+
+    <canvas id="scene-canvas" class="scene__canvas" aria-label="Vue 3D d'une maison de plain-pied avec sa charpente traditionnelle, sa couverture en tuiles, ses gouttières, son bardage bois, sa terrasse et son abri bois."></canvas>
+
+    <div id="chargement" class="chargement" role="status" aria-live="polite">
+        <img src="{{ asset('images/logo/logo-ugb-charpente.svg') }}" alt="" width="96" height="96">
+        <p class="chargement__titre">UGB <strong>Charpente</strong></p>
+        <div class="chargement__barre"><span id="chargement-jauge"></span></div>
+        <p id="chargement-texte" class="chargement__texte">Préparation de la scène…</p>
+    </div>
+
+    <div id="repli" class="repli" hidden>
+        <img src="{{ asset('images/maison-poster.webp') }}" alt="Maison de plain-pied avec toiture en tuiles, bardage bois, terrasse et abri bois." width="1600" height="900">
+        <p id="repli-texte">La vue 3D interactive n'est pas disponible sur cet appareil. Voici un aperçu de la maison.</p>
+    </div>
+    <noscript>
+        <div class="repli">
+            <img src="{{ asset('images/maison-poster.webp') }}" alt="Maison de plain-pied avec toiture en tuiles, bardage bois, terrasse et abri bois." width="1600" height="900">
+            <p>Activez JavaScript pour explorer la maison en 3D.</p>
+        </div>
+    </noscript>
+
+    <aside id="panneau-test" class="panneau-test" hidden aria-label="Outils de test">
+        <button type="button" class="panneau-test__bascule" id="panneau-bascule" aria-expanded="true" aria-controls="panneau-contenu">Outils de test</button>
+        <div id="panneau-contenu">
+            <dl class="panneau-test__mesures">
+                <div><dt>Qualité</dt><dd id="m-qualite">—</dd></div>
+                <div><dt>Triangles</dt><dd id="m-triangles">—</dd></div>
+                <div><dt>Appels de dessin</dt><dd id="m-appels">—</dd></div>
+                <div><dt>Objets nommés</dt><dd id="m-objets">—</dd></div>
+                <div><dt>FPS</dt><dd id="m-fps">—</dd></div>
+            </dl>
+            <button type="button" class="bouton bouton--petit" id="btn-fps">Mesurer les FPS (5 s)</button>
+            <p class="panneau-test__liens">
+                <a href="?qualite=haute">Qualité haute</a> · <a href="?qualite=basse">Qualité allégée</a> · <a href="?repli=1">Tester le repli</a>
+            </p>
+            <fieldset class="panneau-test__calques">
+                <legend>Afficher</legend>
+                <div id="calques"></div>
+            </fieldset>
+        </div>
+    </aside>
+</main>
+{% endblock %}

@@ -1,0 +1,13 @@
+{% extends 'base.html.twig' %}
+
+{% block body_class %}page-provisoire{% endblock %}
+
+{% block body %}
+<main class="provisoire">
+    <img src="{{ asset('images/logo/logo-ugb-charpente.svg') }}" alt="" width="120" height="120">
+    <h1>UGB <span>Charpente</span></h1>
+    <p>Des structures solides, pour tous vos projets.</p>
+    <p class="provisoire__note">Site en cours de construction.</p>
+    <a class="bouton" href="{{ path('test_maison') }}">Voir la maison 3D (page de test)</a>
+</main>
+{% endblock %}
