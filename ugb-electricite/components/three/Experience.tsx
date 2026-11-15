@@ -75,11 +75,18 @@ function Controls({ controls }: { controls: React.RefObject<OrbitControlsImpl | 
   const coarse = typeof window !== "undefined" && window.matchMedia("(pointer: coarse)").matches;
 
   // On touch screens the canvas only captures gestures in explore mode,
-  // otherwise the page must remain scrollable.
+  // otherwise the page must remain scrollable. OrbitControls sets
+  // `touch-action: none` on the element it listens to (the outer Canvas
+  // container), so the value is enforced on the canvas and all its R3F
+  // wrappers every frame (touch-action is intersected along ancestors).
   const enabled = !playing && (!coarse || explore);
-  useEffect(() => {
-    gl.domElement.style.touchAction = enabled ? "none" : "pan-y";
-  }, [enabled, gl]);
+  const touch = enabled ? "none" : "pan-y";
+  useFrame(() => {
+    let el: HTMLElement | null = gl.domElement;
+    for (let i = 0; i < 3 && el; i++, el = el.parentElement) {
+      if (el.style.touchAction !== touch) el.style.touchAction = touch;
+    }
+  });
 
   return (
     <OrbitControls

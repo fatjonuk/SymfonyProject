@@ -213,8 +213,8 @@ function InfoCard() {
 function Dock() {
   const { playing, open, circuits, explore, set } = useUI();
   return (
-    <div className="absolute bottom-5 left-1/2 z-30 w-max max-w-[calc(100vw-1.5rem)] -translate-x-1/2 lg:bottom-8 lg:left-auto lg:right-8 lg:translate-x-0">
-      <div className="dock flex items-center gap-1 overflow-x-auto rounded-full p-1.5 [scrollbar-width:none]">
+    <div className="absolute bottom-5 left-1/2 z-30 w-max max-w-[calc(100vw-1.5rem)] -translate-x-1/2 max-sm:w-[calc(100vw-1.5rem)] lg:bottom-8 lg:left-auto lg:right-8 lg:translate-x-0">
+      <div className="dock flex flex-wrap items-center justify-center gap-1 rounded-[1.6rem] p-1.5 sm:flex-nowrap sm:rounded-full">
         {playing ? (
           <button className="dock-btn" onClick={skipIntro}>
             <IconSkip size={16} /> Passer l’animation
@@ -223,11 +223,13 @@ function Dock() {
           <>
             <button className="dock-btn" aria-pressed={open} onClick={() => setOpen(!open)}>
               {open ? <IconClose size={16} /> : <IconOpen size={16} />}
-              {open ? "Refermer la maison" : "Ouvrir la maison"}
+              <span className="sm:hidden">{open ? "Fermer" : "Ouvrir"}</span>
+              <span className="hidden sm:inline">{open ? "Refermer la maison" : "Ouvrir la maison"}</span>
             </button>
             <button className="dock-btn" aria-pressed={circuits} onClick={() => setCircuits(!circuits)}>
               <IconCircuit size={16} />
-              {circuits ? "Masquer les circuits" : "Afficher les circuits"}
+              <span className="sm:hidden">Circuits</span>
+              <span className="hidden sm:inline">{circuits ? "Masquer les circuits" : "Afficher les circuits"}</span>
             </button>
             <button className="dock-btn" onClick={() => focusDevice(deviceById("panel")!)}>
               <IconTarget size={16} /> Tableau
@@ -239,10 +241,12 @@ function Dock() {
                 overview();
               }}
             >
-              <IconCube size={16} /> Vue d’ensemble
+              <IconCube size={16} /> <span className="sm:hidden">Vue</span>
+              <span className="hidden sm:inline">Vue d’ensemble</span>
             </button>
             <button className="dock-btn" onClick={playIntro}>
-              <IconReplay size={16} /> Rejouer l’animation
+              <IconReplay size={16} /> <span className="sm:hidden">Rejouer</span>
+              <span className="hidden sm:inline">Rejouer l’animation</span>
             </button>
             {explore && (
               <button

@@ -24,6 +24,9 @@ export function interactive(kind: "device" | "room", id: string, focusDist = 9, 
       if (e.delta > 6) return; // it was a drag, not a click
       const ui = useUI.getState();
       if (ui.playing) return;
+      // On touch screens, taps on the scene only select in explore mode,
+      // so a tap while scrolling the page never moves the camera.
+      if (!ui.explore && window.matchMedia("(pointer: coarse)").matches) return;
       ui.set({ selected: { kind, id } });
       const target = focusTarget ? focusTarget() : e.object.getWorldPosition(v);
       flyTo([target.x, target.y, target.z], focusDist);
