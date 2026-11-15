@@ -77,8 +77,8 @@ La maison actuelle est modélisée en code. Pour passer à un modèle architectu
 
 - **Deux niveaux de qualité** : `high` (ombres 4096, AO, MSAA) et `low` (mobile ou CPU modeste, sans AO, résolution réduite). `PerformanceMonitor` bascule automatiquement en `low` si le framerate chute. On peut forcer un niveau avec `?q=high` ou `?q=low`.
 - Le rendu se met en pause quand le hero n’est plus visible.
-- **Sans WebGL**, une image statique (`public/renders/maison-ouverte.jpg`) remplace la scène.
-- `prefers-reduced-motion` : pas de séquence au scroll ; la maison est affichée ouverte, directement explorable.
+- **Sans WebGL**, deux visuels remplacent la scène : la maison fermée, puis la maison ouverte qui apparaît en fondu au fil du scroll (`public/renders/facade.jpg` → `maison-ouverte.jpg`).
+- `prefers-reduced-motion` (iPhone : Réglages › Accessibilité › Mouvement › Réduire les animations) : la séquence reste pilotée par le scroll, car c’est le visiteur qui la contrôle, mais la caméra reste fixe, les impulsions lumineuses sont coupées et les déplacements de caméra sont instantanés.
 - La séquence est plus courte sur mobile (≈ 390 vh contre ≈ 510 vh sur ordinateur).
 - Les petits équipements ont une zone de clic invisible élargie, pour le tactile.
 

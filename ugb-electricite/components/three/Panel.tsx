@@ -4,7 +4,7 @@ import { Html } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 import { useMemo, useRef } from "react";
 import * as THREE from "three";
-import { A } from "@/lib/anim";
+import { A, reduced } from "@/lib/anim";
 import { useUI } from "@/lib/store";
 import { PANEL_POS } from "./data";
 import { interactive } from "./interaction";
@@ -20,6 +20,7 @@ const MOD = 0.04; // module width (scaled for legibility)
 export function Panel() {
   const M = mats();
   const label = useUI((s) => s.step === 2 && s.mode === "timeline");
+  const still = reduced();
   const halo = useRef<THREE.Mesh>(null);
   const haloMat = useMemo(
     () =>
@@ -43,7 +44,7 @@ export function Panel() {
     const ui = useUI.getState();
     const focus = ui.hovered === "panel" || (ui.selected?.kind === "device" && ui.selected.id === "panel");
     const k = Math.max(A.panel, focus ? 1 : 0);
-    const pulse = 0.82 + 0.18 * Math.sin(s.clock.elapsedTime * 2.2);
+    const pulse = still ? 0.9 : 0.82 + 0.18 * Math.sin(s.clock.elapsedTime * 2.2);
     haloMat.opacity = k * 0.85 * pulse;
     accent.emissiveIntensity = k * 1.4;
     led.emissiveIntensity = 2 + A.circuits * 0.2;

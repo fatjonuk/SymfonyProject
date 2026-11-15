@@ -3,7 +3,7 @@
 import { useFrame } from "@react-three/fiber";
 import { useMemo, useRef } from "react";
 import * as THREE from "three";
-import { A, K, switchIsOn } from "@/lib/anim";
+import { A, K, reduced, switchIsOn } from "@/lib/anim";
 import { useUI } from "@/lib/store";
 import { CIRCUIT_COLORS, DEVICES, H, type Device } from "./data";
 import { interactive } from "./interaction";
@@ -36,6 +36,7 @@ type HaloProps = { color: string; size: number; strength: () => number; id: stri
 export function Halo({ color, size, strength, id, focusMin = 1 }: HaloProps) {
   // Indoor halos are seen through walls only once the house is open.
   const inside = INSIDE.has(id);
+  const still = reduced();
   const ref = useRef<THREE.Sprite>(null);
   const mat = useMemo(
     () =>
@@ -54,7 +55,7 @@ export function Halo({ color, size, strength, id, focusMin = 1 }: HaloProps) {
     if (!ref.current) return;
     const ui = useUI.getState();
     const focus = ui.hovered === id || (ui.selected?.kind === "device" && ui.selected.id === id);
-    const pulse = 0.85 + 0.15 * Math.sin(s.clock.elapsedTime * 3 + size * 10);
+    const pulse = still ? 0.92 : 0.85 + 0.15 * Math.sin(s.clock.elapsedTime * 3 + size * 10);
     const k = Math.max(strength(), focus ? focusMin : 0);
     mat.opacity = k * pulse * (focus ? 1 : 0.75);
     const sc = size * (focus ? 1.5 : 1) * (0.6 + 0.4 * k);

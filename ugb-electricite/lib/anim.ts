@@ -93,8 +93,6 @@ export const rig: Rig = { sync: () => {} };
 const ui = () => useUI.getState();
 let flyTween: gsap.core.Tween | null = null;
 let mode: Mode = "timeline";
-/** True when the scroll sequence is disabled (reduced motion): the hero copy stays on screen. */
-let isStatic = false;
 
 /**
  * Framing of the house in the viewport:
@@ -107,7 +105,7 @@ function applyFrame() {
   let offset = 0.17;
   if (mode === "explore") {
     if (!desktop && ui().selected) offset = -0.2;
-    else if (!isStatic) offset = desktop ? 0.08 : 0.1;
+    else offset = desktop ? 0.08 : 0.1;
   }
   gsap.to(FRAME, { offset, duration: 1.1, ease: "power2.inOut", overwrite: true });
 }
@@ -159,7 +157,12 @@ export function resetCamera() {
 /* Exploration mode actions                                            */
 /* ------------------------------------------------------------------ */
 
-const reduced = () => typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+/**
+ * "Reduce motion" preference (iOS: Accessibilité › Mouvement, Android: Supprimer les animations).
+ * The scroll sequence is kept — the visitor controls it — but decorative motion is
+ * removed: fixed camera, no light pulses, instant camera jumps.
+ */
+export const reduced = () => typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 /** Opens / closes the house (exploration mode). */
 export function setOpen(open: boolean) {
@@ -298,40 +301,49 @@ function setMode(next: Mode) {
   } else {
     ui().set({ mode: next });
     // Settle on the open architectural view before handing over to the visitor.
-    flyTo([END.tx, END.ty, END.tz], END.dist, { az: END.az, el: END.el, duration: 0.9 });
+    if (!reduced()) flyTo([END.tx, END.ty, END.tz], END.dist, { az: END.az, el: END.el, duration: 0.9 });
   }
   applyFrame();
 }
 
+/** Single wide pose framing both the closed and the exploded house (reduced motion). */
+const STILL: Pose = { az: 0.9, el: 0.38, dist: 53, tx: 0.8, ty: 4.2, tz: 0.3 };
+
 function buildTimeline() {
+  const still = reduced();
   Object.assign(S, S0);
-  Object.assign(CAM, START);
+  Object.assign(CAM, still ? STILL : START);
+  Object.assign(VIEW, CAM);
   const e = "power2.inOut";
   const tl = gsap.timeline({ paused: true });
+  // With reduced motion the camera does not travel: only the house itself moves.
+  const cam = (vars: gsap.TweenVars, at: number) => {
+    if (!still) tl.to(CAM, vars, at);
+  };
 
   // 0 – 15 % — complete house, slow cinematic move
-  tl.to(CAM, { az: 0.68, el: 0.33, dist: 43, duration: 15, ease: "sine.inOut" }, 0);
+  cam({ az: 0.68, el: 0.33, dist: 43, duration: 15, ease: "sine.inOut" }, 0);
 
   // 15 – 40 % — exploded view
   tl.to(S, { roof: 1, duration: 16, ease: e }, 15);
   tl.to(S, { facade: 1, duration: 18, ease: e }, 18);
   tl.to(S, { floor: 1, duration: 19, ease: e }, 21);
   tl.to(S, { walls: 1, duration: 12, ease: e }, 28);
-  tl.to(CAM, { dist: 55, el: 0.4, ty: 5.4, duration: 25, ease: e }, 15);
+  cam({ dist: 55, el: 0.4, ty: 5.4, duration: 25, ease: e }, 15);
 
   // 40 – 55 % — the electrical panel becomes the point of attention
   tl.to(S, { panel: 1, duration: 7, ease: "power2.out" }, 40);
-  tl.to(CAM, { tx: -3.4, ty: 2.6, tz: 1.0, dist: 36, az: 0.56, el: 0.36, duration: 12, ease: e }, 40);
+  cam({ tx: -3.4, ty: 2.6, tz: 1.0, dist: 36, az: 0.56, el: 0.36, duration: 12, ease: e }, 40);
 
   // 55 – 80 % — circuits are drawn from the panel
   tl.to(S, { circuits: CIRCUIT_MAX, duration: 25, ease: "power1.inOut" }, 55);
-  tl.to(CAM, { tx: END.tx, ty: END.ty, tz: END.tz, dist: 55, az: 0.72, el: 0.4, duration: 21, ease: e }, 55);
+  cam({ tx: END.tx, ty: END.ty, tz: END.tz, dist: 55, az: 0.72, el: 0.4, duration: 21, ease: e }, 55);
 
   // 80 – 100 % — lights and devices come alive, camera settles on the open view
   tl.to(S, { devices: 1, duration: 8, ease: "power2.out" }, 80);
   tl.to(S, { lights: 1, duration: 17, ease: "power1.inOut" }, 80);
   tl.to(S, { sun: 0.6, duration: 15, ease: "sine.inOut" }, 80);
-  tl.to(CAM, { az: END.az, el: END.el, dist: END.dist, duration: 18, ease: "sine.inOut" }, 80);
+  cam({ az: END.az, el: END.el, dist: END.dist, duration: 18, ease: "sine.inOut" }, 80);
 
   // plateau: the house stays pinned and open, exploration mode is active
   tl.to({}, { duration: PLATEAU }, SEQUENCE);
@@ -354,7 +366,6 @@ export function initScroll(trigger: HTMLElement, pin: HTMLElement) {
   gsap.registerPlugin(ScrollTrigger, ScrollToPlugin);
   ScrollTrigger.config({ ignoreMobileResize: true });
   mode = "timeline";
-  isStatic = false;
   ui().set({ mode: "timeline", step: 0 });
   const tl = buildTimeline();
   st = ScrollTrigger.create({
@@ -362,7 +373,7 @@ export function initScroll(trigger: HTMLElement, pin: HTMLElement) {
     pin,
     start: "top top",
     end: () => `+=${Math.round(window.innerHeight * scrollLength())}`,
-    scrub: 0.6,
+    scrub: reduced() ? true : 0.6,
     animation: tl,
     anticipatePin: 1,
     refreshPriority: 10,
@@ -375,23 +386,6 @@ export function initScroll(trigger: HTMLElement, pin: HTMLElement) {
     st = null;
     tl.kill();
   };
-}
-
-/**
- * Static variant (reduced motion): no scroll sequence, the house is shown
- * open with its circuits and can be explored straight away.
- */
-export function initStatic() {
-  Object.assign(S, { roof: 1, facade: 1, floor: 1, walls: 1, panel: 1, circuits: CIRCUIT_MAX, lights: 1, devices: 1, sun: 0.6 });
-  Object.assign(CAM, END);
-  Object.assign(VIEW, END);
-  SCROLL.p = 1;
-  mode = "explore";
-  isStatic = true;
-  ui().set({ mode: "explore", step: 0 });
-  FRAME.offset = 0.17;
-  gsap.ticker.add(updateState);
-  return () => gsap.ticker.remove(updateState);
 }
 
 /** Scroll position (px) of a given sequence time (0 – 120). */
@@ -408,7 +402,7 @@ export function goToExplore() {
   const remaining = Math.abs(y - window.scrollY) / Math.max(1, st.end - st.start);
   gsap.to(window, {
     scrollTo: { y, autoKill: true },
-    duration: Math.max(1.2, 11 * remaining),
+    duration: reduced() ? 0 : Math.max(1.2, 11 * remaining),
     ease: "power1.inOut",
     overwrite: true,
   });
@@ -420,7 +414,7 @@ export function replay() {
   gsap.registerPlugin(ScrollToPlugin);
   gsap.to(window, {
     scrollTo: { y: st.start, autoKill: true },
-    duration: 1.6,
+    duration: reduced() ? 0 : 1.6,
     ease: "power2.inOut",
     overwrite: true,
     onComplete: goToExplore,
@@ -438,6 +432,7 @@ if (typeof window !== "undefined") {
     CAM,
     VIEW,
     FLY,
+    FRAME,
     ui: useUI,
     gsap,
     /** Jumps to a sequence time (0 – 120). */

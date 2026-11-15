@@ -1,6 +1,7 @@
 "use client";
 
 import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 import dynamic from "next/dynamic";
 import { useEffect, useRef, useState } from "react";
 import {
@@ -8,7 +9,6 @@ import {
   clearSelection,
   goToExplore,
   initScroll,
-  initStatic,
   replay,
   resetCamera,
   rotateBy,
@@ -190,11 +190,6 @@ function Copy({ isStatic }: { isStatic: boolean }) {
               </button>
             )}
           </div>
-          {isStatic && explore && (
-            <div className="pointer-events-auto">
-              <CircuitFilters />
-            </div>
-          )}
         </div>
 
         {/* 02 → 05 — one short line per chapter */}
@@ -471,7 +466,7 @@ function InfoPanel() {
   );
 }
 
-function Dock({ isStatic }: { isStatic: boolean }) {
+function Dock() {
   const explore = useUI((s) => s.mode === "explore");
   const open = useUI((s) => s.open);
   const hasPanel = useUI((s) => !!s.selected);
@@ -515,11 +510,9 @@ function Dock({ isStatic }: { isStatic: boolean }) {
           <span className="sm:hidden">{open ? "Fermer" : "Ouvrir"}</span>
           <span className="hidden sm:inline">{open ? "Refermer la maison" : "Ouvrir la maison"}</span>
         </button>
-        {!isStatic && (
-          <button className="dock-btn" onClick={replay}>
-            <IconReplay size={16} /> Rejouer
-          </button>
-        )}
+        <button className="dock-btn" onClick={replay}>
+          <IconReplay size={16} /> Rejouer
+        </button>
       </div>
     </div>
   );
@@ -545,14 +538,46 @@ function Loader() {
   );
 }
 
-/** Simplified experience for devices that cannot display the 3D scene. */
+/**
+ * Simplified experience for devices that cannot display the 3D scene:
+ * the finished house first, then the open house with its circuits as the visitor scrolls.
+ */
 function Fallback() {
+  const img = "absolute inset-0 h-full w-full object-contain object-bottom lg:object-right";
   return (
-    <div className="absolute inset-0 flex items-end justify-center lg:items-center lg:justify-end lg:pr-[4vw]">
+    <div className="absolute inset-x-0 bottom-0 h-[58%] lg:inset-y-0 lg:left-auto lg:right-[3vw] lg:h-full lg:w-[66%]">
       {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src="/renders/maison-ouverte.jpg" alt="Maison contemporaine et son installation électrique" className="h-[55%] w-full object-contain lg:h-[80%] lg:w-[70%]" />
+      <img src="/renders/facade.jpg" alt="Maison contemporaine UGB Électricité" className={`fallback-closed ${img}`} />
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src="/renders/maison-ouverte.jpg"
+        alt="Maison ouverte et son installation électrique"
+        className={`fallback-open ${img}`}
+        style={{ opacity: 0 }}
+      />
     </div>
   );
+}
+
+/** Pins the stage and cross-fades the two fallback pictures with the scroll. */
+function initFallback(trigger: HTMLElement, pin: HTMLElement) {
+  gsap.registerPlugin(ScrollTrigger);
+  const tl = gsap.timeline({ paused: true });
+  tl.to(pin.querySelector(".fallback-closed"), { opacity: 0, duration: 1 }, 0.3);
+  tl.to(pin.querySelector(".fallback-open"), { opacity: 1, duration: 1 }, 0.3);
+  tl.to({}, { duration: 0.4 });
+  const st = ScrollTrigger.create({
+    trigger,
+    pin,
+    start: "top top",
+    end: () => `+=${Math.round(window.innerHeight * 1.6)}`,
+    scrub: true,
+    animation: tl,
+  });
+  return () => {
+    st.kill(true);
+    tl.kill();
+  };
 }
 
 /* ------------------------------------------------------------------ */
@@ -562,7 +587,6 @@ export function Hero() {
   const stage = useRef<HTMLDivElement>(null);
   const [webgl, setWebgl] = useState<boolean | null>(null);
   const [visible, setVisible] = useState(true);
-  const [isStatic, setStatic] = useState(false);
 
   useEffect(() => {
     const el = section.current;
@@ -573,18 +597,22 @@ export function Hero() {
     // Rendering is paused whenever the 3D stage is off screen.
     const io = new IntersectionObserver(([e]) => setVisible(e.isIntersecting));
     io.observe(el);
-    let cleanup = () => {};
-    if (ok) {
-      // Reduced motion: no scroll-driven sequence, the open house is shown directly.
-      const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-      setStatic(reduce);
-      cleanup = reduce ? initStatic() : initScroll(el, pin);
-    }
+    // The scroll drives the sequence on every device, including phones with
+    // "reduce motion" enabled (the camera then stays still, see lib/anim.ts).
+    const cleanup = ok ? initScroll(el, pin) : () => {};
     return () => {
       io.disconnect();
       cleanup();
     };
   }, []);
+
+  // Without WebGL the fallback pictures are mounted first, then bound to the scroll.
+  useEffect(() => {
+    const el = section.current;
+    const pin = stage.current;
+    if (webgl !== false || !el || !pin) return;
+    return initFallback(el, pin);
+  }, [webgl]);
 
   return (
     <section ref={section} id="accueil" className="relative w-full bg-ivory">
@@ -596,14 +624,14 @@ export function Hero() {
         </div>
 
         {webgl !== false && <Loader />}
-        <Copy isStatic={isStatic || webgl === false} />
+        <Copy isStatic={webgl === false} />
 
         {webgl === true && (
           <>
-            {!isStatic && <PhaseRail />}
-            {!isStatic && <ScrollHint />}
+            <PhaseRail />
+            <ScrollHint />
             <InfoPanel />
-            <Dock isStatic={isStatic} />
+            <Dock />
           </>
         )}
       </div>

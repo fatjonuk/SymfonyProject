@@ -4,7 +4,7 @@ import { useFrame } from "@react-three/fiber";
 import { useMemo } from "react";
 import * as THREE from "three";
 import { mergeGeometries } from "three/examples/jsm/utils/BufferGeometryUtils.js";
-import { A, EXPLODE, FOCUS, K } from "@/lib/anim";
+import { A, EXPLODE, FOCUS, K, reduced } from "@/lib/anim";
 import { CIRCUIT_COLORS, CIRCUITS, H, RISER, groupIndex, type Circuit, type CircuitKind, type V3 } from "./data";
 
 const RADIUS: Record<CircuitKind, number> = { light: 0.028, outlet: 0.028, special: 0.036 };
@@ -75,6 +75,7 @@ const frag = /* glsl */ `
   uniform float uFocusA;
   uniform float uFocusB;
   uniform float uFocusAmt;
+  uniform float uPackets;
   varying float vDist;
   varying float vId;
   varying vec3 vN;
@@ -87,7 +88,7 @@ const frag = /* glsl */ `
     float alpha = uOpacity * uVis * keep;
     if (alpha < 0.004) discard;
     float head = smoothstep(uReveal - 0.9, uReveal, vDist);
-    float packet = smoothstep(0.82, 1.0, fract((vDist - uTime * 2.4) / 1.8));
+    float packet = uPackets * smoothstep(0.82, 1.0, fract((vDist - uTime * 2.4) / 1.8));
     float rim = pow(1.0 - abs(dot(vN, vV)), 1.5);
     float glow = uBoost * (packet * 1.6 + head * 2.6) * keep + isF * uFocusAmt * 0.45;
     vec3 col = uColor * (0.95 + 0.5 * rim + glow);
@@ -109,6 +110,7 @@ function makeMaterial(color: string, xray: boolean) {
       uFocusA: { value: -1 },
       uFocusB: { value: -1 },
       uFocusAmt: { value: 0 },
+      uPackets: { value: 1 },
     },
     transparent: true,
     depthTest: !xray,
@@ -131,6 +133,7 @@ export function circuitMaterials() {
 
 /** Updates the shared circuit uniforms once per frame. */
 export function CircuitDriver() {
+  const still = reduced();
   useFrame((state) => {
     const m = circuitMaterials();
     const t = state.clock.elapsedTime;
@@ -143,6 +146,7 @@ export function CircuitDriver() {
         u.uFocusA.value = FOCUS.a;
         u.uFocusB.value = FOCUS.b;
         u.uFocusAmt.value = FOCUS.amt;
+        u.uPackets.value = still ? 0 : 1;
       }
     }
   });
