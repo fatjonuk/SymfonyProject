@@ -81,8 +81,11 @@ export function Landscape() {
   return (
     <group>
       {/* infinite studio floor */}
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, G, 0]} material={M.ground} receiveShadow>
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, G, 0]} material={M.ground}>
         <planeGeometry args={[400, 400]} />
+      </mesh>
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, G + 0.002, 0]} material={M.groundShadow} receiveShadow>
+        <planeGeometry args={[120, 120]} />
       </mesh>
       {/* lawn */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[1.5, G + 0.004, 8.4]} material={M.lawn} receiveShadow>
@@ -93,8 +96,8 @@ export function Landscape() {
       </mesh>
 
       {/* driveway & entrance path */}
-      <mesh position={[-9.4, G + 0.01, 5]} material={M.stone} receiveShadow>
-        <boxGeometry args={[3.8, 0.02, 19]} />
+      <mesh position={[-9.4, G + 0.01, 1.75]} material={M.stone} receiveShadow>
+        <boxGeometry args={[3.8, 0.02, 12.5]} />
       </mesh>
       {Array.from({ length: 9 }).map((_, i) => (
         <mesh key={i} position={[-4.85, G + 0.02, 5.1 + i * 0.85]} material={M.stone} receiveShadow castShadow>

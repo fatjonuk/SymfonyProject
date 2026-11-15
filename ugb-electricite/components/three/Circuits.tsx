@@ -4,8 +4,8 @@ import { useFrame } from "@react-three/fiber";
 import { useMemo } from "react";
 import * as THREE from "three";
 import { mergeGeometries } from "three/examples/jsm/utils/BufferGeometryUtils.js";
-import { A, EXPLODE } from "@/lib/anim";
-import { CIRCUIT_COLORS, CIRCUITS, H, RISER, type Circuit, type CircuitKind, type V3 } from "./data";
+import { A, EXPLODE, FOCUS, K } from "@/lib/anim";
+import { CIRCUIT_COLORS, CIRCUITS, H, RISER, groupIndex, type Circuit, type CircuitKind, type V3 } from "./data";
 
 const RADIUS: Record<CircuitKind, number> = { light: 0.028, outlet: 0.028, special: 0.036 };
 
@@ -42,17 +42,22 @@ function circuitGeometry(c: Circuit) {
   const dist = new Float32Array(uv.count);
   for (let i = 0; i < uv.count; i++) dist[i] = c.start + uv.getX(i) * len;
   g.setAttribute("aDist", new THREE.BufferAttribute(dist, 1));
+  // circuit group index: lets the shader highlight one circuit and dim the others
+  g.setAttribute("aId", new THREE.BufferAttribute(new Float32Array(uv.count).fill(groupIndex(c.group)), 1));
   g.deleteAttribute("uv");
   return g;
 }
 
 const vert = /* glsl */ `
   attribute float aDist;
+  attribute float aId;
   varying float vDist;
+  varying float vId;
   varying vec3 vN;
   varying vec3 vV;
   void main() {
     vDist = aDist;
+    vId = aId;
     vec4 mv = modelViewMatrix * vec4(position, 1.0);
     vN = normalize(normalMatrix * normal);
     vV = normalize(-mv.xyz);
@@ -66,16 +71,27 @@ const frag = /* glsl */ `
   uniform float uTime;
   uniform float uOpacity;
   uniform float uBoost;
+  uniform float uVis;
+  uniform float uFocusA;
+  uniform float uFocusB;
+  uniform float uFocusAmt;
   varying float vDist;
+  varying float vId;
   varying vec3 vN;
   varying vec3 vV;
   void main() {
     if (vDist > uReveal) discard;
+    // 1 on the highlighted circuit group(s), 0 elsewhere
+    float isF = max(1.0 - step(0.5, abs(vId - uFocusA)), 1.0 - step(0.5, abs(vId - uFocusB)));
+    float keep = mix(1.0, mix(0.07, 1.0, isF), uFocusAmt);
+    float alpha = uOpacity * uVis * keep;
+    if (alpha < 0.004) discard;
     float head = smoothstep(uReveal - 0.9, uReveal, vDist);
     float packet = smoothstep(0.82, 1.0, fract((vDist - uTime * 2.4) / 1.8));
     float rim = pow(1.0 - abs(dot(vN, vV)), 1.5);
-    vec3 col = uColor * (0.95 + 0.5 * rim + uBoost * (packet * 1.6 + head * 2.6));
-    gl_FragColor = vec4(col, uOpacity);
+    float glow = uBoost * (packet * 1.6 + head * 2.6) * keep + isF * uFocusAmt * 0.45;
+    vec3 col = uColor * (0.95 + 0.5 * rim + glow);
+    gl_FragColor = vec4(col, alpha);
   }
 `;
 
@@ -89,8 +105,12 @@ function makeMaterial(color: string, xray: boolean) {
       uTime: { value: 0 },
       uOpacity: { value: xray ? 0.32 : 1 },
       uBoost: { value: xray ? 0.5 : 1 },
+      uVis: { value: 1 },
+      uFocusA: { value: -1 },
+      uFocusB: { value: -1 },
+      uFocusAmt: { value: 0 },
     },
-    transparent: xray,
+    transparent: true,
     depthTest: !xray,
     depthWrite: !xray,
     toneMapped: false,
@@ -116,8 +136,13 @@ export function CircuitDriver() {
     const t = state.clock.elapsedTime;
     for (const k of Object.keys(m) as CircuitKind[]) {
       for (const mat of [m[k].solid, m[k].xray]) {
-        mat.uniforms.uReveal.value = A.circuits;
-        mat.uniforms.uTime.value = t;
+        const u = mat.uniforms;
+        u.uReveal.value = A.circuits;
+        u.uTime.value = t;
+        u.uVis.value = K[k];
+        u.uFocusA.value = FOCUS.a;
+        u.uFocusB.value = FOCUS.b;
+        u.uFocusAmt.value = FOCUS.amt;
       }
     }
   });
@@ -142,7 +167,7 @@ export function Circuits({ level }: { level: "ground" | "upper" }) {
     <group>
       {geos.map(({ kind, geo }) => (
         <group key={kind}>
-          <mesh geometry={geo} material={m[kind].solid} frustumCulled={false} />
+          <mesh geometry={geo} material={m[kind].solid} renderOrder={19} frustumCulled={false} />
           <mesh geometry={geo} material={m[kind].xray} renderOrder={20} frustumCulled={false} />
         </group>
       ))}
@@ -161,6 +186,7 @@ export function RiserBridge() {
     g.translate(0, 0.5, 0);
     const d = new Float32Array(g.attributes.position.count).fill(RISER.to - RISER.from + 0.05);
     g.setAttribute("aDist", new THREE.BufferAttribute(d, 1));
+    g.setAttribute("aId", new THREE.BufferAttribute(new Float32Array(d.length).fill(groupIndex("colonne")), 1));
     return g;
   }, []);
   const refs = useMemo(() => ({ group: null as THREE.Group | null }), []);
@@ -171,7 +197,7 @@ export function RiserBridge() {
   });
   return (
     <group ref={(g) => { refs.group = g; }} position={[RISER.x, H.groundCeil, RISER.z]}>
-      <mesh geometry={geo} material={m.light.solid} frustumCulled={false} />
+      <mesh geometry={geo} material={m.light.solid} renderOrder={19} frustumCulled={false} />
       <mesh geometry={geo} material={m.light.xray} renderOrder={20} frustumCulled={false} />
     </group>
   );

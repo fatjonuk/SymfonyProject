@@ -7,28 +7,35 @@ import * as THREE from "three";
 import { A, EXPLODE } from "@/lib/anim";
 import { useUI } from "@/lib/store";
 
-type PL = { p: [number, number, number]; upper?: boolean; at: number; i: number; d: number };
+type PL = { p: [number, number, number]; upper?: boolean; at: number; i: number; d: number; ids: string[] };
 
-/** Warm interior lights that come on during phase 5 (no shadows: cheap). */
+/**
+ * Warm interior lights that come on at the end of the sequence (no shadows: cheap).
+ * Each one follows the luminaires of its room: switching them off dims the room.
+ */
 const POINTS: PL[] = [
-  { p: [-5.2, 2.5, 2.8], at: 0.0, i: 5, d: 7 },
-  { p: [0, 2.6, -0.2], at: 0.15, i: 9, d: 10 },
-  { p: [4.9, 1.8, -1.2], at: 0.3, i: 7, d: 8 },
-  { p: [4.9, 1.6, 2.4], at: 0.38, i: 5, d: 6 },
-  { p: [0, 5.7, -0.6], upper: true, at: 0.5, i: 6, d: 8 },
-  { p: [5.4, 5.7, -0.6], upper: true, at: 0.55, i: 7, d: 9 },
-  { p: [-4.4, 5.7, 2.25], upper: true, at: 0.6, i: 4, d: 6 },
-  { p: [7.75, 2.5, 0], upper: true, at: 0.68, i: 6, d: 8 },
+  { p: [-5.2, 2.5, 2.8], at: 0.0, i: 5, d: 7, ids: ["l-entree"] },
+  { p: [0, 2.6, -0.2], at: 0.15, i: 9, d: 10, ids: ["l-spot-1", "l-spot-2", "l-spot-3", "l-spot-4", "l-spot-5", "l-spot-6"] },
+  { p: [4.9, 1.8, -1.2], at: 0.3, i: 7, d: 8, ids: ["l-susp-1", "l-susp-2", "l-susp-3"] },
+  { p: [4.9, 1.6, 2.4], at: 0.38, i: 5, d: 6, ids: ["l-table"] },
+  { p: [0, 5.7, -0.6], upper: true, at: 0.5, i: 6, d: 8, ids: ["l-chambre"] },
+  { p: [5.4, 5.7, -0.6], upper: true, at: 0.55, i: 7, d: 9, ids: ["l-suite"] },
+  { p: [-4.4, 5.7, 2.25], upper: true, at: 0.6, i: 4, d: 6, ids: ["l-sdb"] },
+  { p: [7.75, 2.5, 0], upper: true, at: 0.68, i: 6, d: 8, ids: ["l-sous-face-1", "l-sous-face-2", "l-sous-face-3"] },
 ];
 
 function InteriorLights() {
   const refs = useRef<(THREE.PointLight | null)[]>([]);
-  useFrame(() => {
+  const on = useRef(POINTS.map(() => 1));
+  useFrame((_, dt) => {
+    const off = useUI.getState().off;
     POINTS.forEach((l, k) => {
       const el = refs.current[k];
       if (!el) return;
+      const share = l.ids.filter((id) => !off[id]).length / l.ids.length;
+      on.current[k] += (share - on.current[k]) * Math.min(1, dt * 8);
       const t = Math.min(1, Math.max(0, (A.lights - l.at) / 0.18));
-      el.intensity = t * t * (3 - 2 * t) * l.i;
+      el.intensity = t * t * (3 - 2 * t) * l.i * on.current[k];
       el.position.y = l.p[1] + (l.upper ? A.floor * EXPLODE.floorLift : 0);
       el.visible = el.intensity > 0.01;
     });
@@ -88,7 +95,7 @@ export function Lighting() {
       <InteriorLights />
       {/* Studio environment for glass and metal reflections (no network needed) */}
       <Environment resolution={256} frames={1} environmentIntensity={0.42}>
-        <color attach="background" args={["#e9e4db"]} />
+        <color attach="background" args={["#eeece6"]} />
         <Lightformer form="rect" intensity={1.0} position={[0, 12, 0]} rotation-x={Math.PI / 2} scale={[30, 30, 1]} />
         <Lightformer form="rect" intensity={0.8} position={[-14, 4, 10]} rotation-y={Math.PI / 3} scale={[20, 6, 1]} />
         <Lightformer form="rect" intensity={0.5} position={[16, 3, -6]} rotation-y={-Math.PI / 2.5} scale={[16, 5, 1]} />

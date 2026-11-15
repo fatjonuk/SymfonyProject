@@ -6,6 +6,13 @@ import { cladding, concrete, fabric, oak, plaster, stone } from "./textures";
  * Geometry UVs are expressed in metres, textures cover 2 m (repeat 0.5).
  */
 
+/**
+ * Studio backdrop colour (linear, HDR). The value is pre-compensated for the
+ * tone mapping pass so that the rendered background is exactly the page's
+ * off-white (#F7F6F2): the 3D stage blends seamlessly into the site.
+ */
+export const STUDIO = new THREE.Color().setRGB(1.385, 1.372, 1.32);
+
 let lib: ReturnType<typeof build> | null = null;
 
 function rep<T extends THREE.Texture>(t: T, r = 0.5) {
@@ -29,7 +36,9 @@ function build() {
     walnut: std({ color: "#6b4a33", map: rep(oak(), 1), roughness: 0.5 }),
     deck: std({ color: "#c9a27e", map: rep(cladding(), 0.6), roughness: 0.8 }),
     stone: std({ color: "#ffffff", map: rep(stone()), roughness: 0.82 }),
-    ground: std({ color: "#ebe6dc", roughness: 1 }),
+    // unlit "infinite studio" floor: same colour as the background, shadows are layered on top
+    ground: new THREE.MeshBasicMaterial({ color: STUDIO }),
+    groundShadow: new THREE.ShadowMaterial({ color: "#3b3327", opacity: 0.2 }),
     lawn: std({ color: "#b9bfa4", roughness: 1 }),
     frame: std({ color: "#26292e", metalness: 0.55, roughness: 0.42 }),
     glass: new THREE.MeshPhysicalMaterial({

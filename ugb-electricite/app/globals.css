@@ -5,8 +5,8 @@
   --color-night-2: #15274f;
   --color-volt: #f2b705;
   --color-volt-soft: #ffd75a;
-  --color-ivory: #f3efe8;
-  --color-sand: #e7e0d4;
+  --color-ivory: #f7f6f2;
+  --color-sand: #ebe8e0;
   --color-ink: #0f1424;
   --color-mute: #5d6375;
   --color-outlet: #3fa9f5;
@@ -23,7 +23,6 @@
 }
 
 html {
-  scroll-behavior: smooth;
   background: var(--color-ivory);
 }
 
@@ -152,6 +151,103 @@ body {
   background: var(--color-volt);
   color: var(--color-night);
 }
+.dock-icon {
+  padding: 0.55rem;
+}
+
+/* ---------- Circuit filters & info panel actions ---------- */
+.filter-chip {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 0.45rem;
+  white-space: nowrap;
+  border-radius: 999px;
+  border: 1px solid rgb(13 27 61 / 0.14);
+  background: rgb(255 255 255 / 0.7);
+  padding: 0.45rem 0.8rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--color-night);
+  backdrop-filter: blur(8px);
+  transition:
+    background-color 0.3s var(--ease-premium),
+    border-color 0.3s var(--ease-premium),
+    color 0.3s var(--ease-premium);
+}
+.filter-chip:hover {
+  border-color: rgb(13 27 61 / 0.4);
+}
+.filter-chip[aria-pressed="true"] {
+  background: var(--color-night);
+  border-color: var(--color-night);
+  color: #fff;
+}
+.card-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  border-radius: 999px;
+  border: 1px solid rgb(13 27 61 / 0.16);
+  padding: 0.55rem 0.95rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--color-night);
+  transition: all 0.3s var(--ease-premium);
+}
+.card-action:hover {
+  border-color: var(--color-night);
+}
+.card-action[aria-pressed="true"] {
+  background: var(--color-volt);
+  border-color: var(--color-volt);
+}
+.filter-chip:focus-visible,
+.card-action:focus-visible {
+  outline: 2px solid var(--color-volt);
+  outline-offset: 2px;
+}
+
+/* ---------- Scroll hint ---------- */
+.scroll-mouse {
+  position: relative;
+  width: 22px;
+  height: 34px;
+  border-radius: 12px;
+  border: 1.5px solid rgb(13 27 61 / 0.45);
+}
+.scroll-mouse::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 6px;
+  width: 3px;
+  height: 7px;
+  margin-left: -1.5px;
+  border-radius: 2px;
+  background: var(--color-volt);
+  animation: scroll-dot 1.8s var(--ease-premium) infinite;
+}
+@keyframes scroll-dot {
+  0% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  70% {
+    transform: translateY(11px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .scroll-mouse::after {
+    animation: none;
+  }
+}
+
 .dock-btn:focus-visible,
 .btn:focus-visible {
   outline: 2px solid var(--color-volt);
@@ -300,9 +396,6 @@ body {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  html {
-    scroll-behavior: auto;
-  }
   [data-reveal] {
     opacity: 1;
     transform: none;

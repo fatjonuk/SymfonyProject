@@ -171,6 +171,8 @@ export const DEVICES: Device[] = [
   // ---- Ground floor switches
   { id: "s-salon", type: "switch", room: "salon", level: "ground", title: "Interrupteur — Salon", text: "Commande des spots encastrés du salon, avec variation d’intensité.", specs: SWITCH_SPECS, pos: [-3.43, 1.15, 1.95], facing: "+x" },
 
+  { id: "s-cuisine", type: "switch", room: "cuisine", level: "ground", title: "Interrupteur — Cuisine", text: "Commande des suspensions de l’îlot, à portée de main depuis le plan de travail.", specs: SWITCH_SPECS, pos: [3.2, 1.35, -4.19], facing: "+z" },
+
   // ---- Ground floor lights
   { id: "l-entree", type: "light", room: "entree", level: "ground", style: "disc", order: 0.0, title: "Plafonnier — Entrée", text: "Plafonnier LED commandé par détecteur de présence à l’entrée.", specs: LIGHT_SPECS, pos: [-5.2, 2.98, 2.8], facing: "down" },
   { id: "l-spot-1", type: "light", room: "salon", level: "ground", style: "spot", order: 0.08, title: "Spot encastré — Salon", text: "Spots LED basse consommation encastrés, répartis pour un éclairage homogène.", specs: LIGHT_SPECS, pos: [-2, 2.98, 1.5], facing: "down" },
@@ -214,6 +216,60 @@ export const DEVICES: Device[] = [
   { id: "l-sous-face-3", type: "light", room: "exterieur", level: "upper", style: "soffit", order: 0.74, title: "Spot de sous-face — Terrasse", text: "Spots encastrés dans le porte-à-faux pour mettre en valeur la terrasse.", specs: ["Circuit éclairage extérieur", "Indice IP65", "Commande par détection"], pos: [7.75, 2.97, -2.0], facing: "down" },
 ];
 
+/** Circuit group feeding each device. */
+export const DEVICE_CIRCUIT: Record<string, string> = {
+  "o-salon-1": "prises-salon",
+  "o-salon-2": "prises-salon",
+  "o-salon-3": "prises-salon",
+  "o-cuisine-1": "prises-cuisine",
+  "o-cuisine-2": "prises-cuisine",
+  "o-cuisine-3": "prises-cuisine",
+  "o-chambre-1": "prises-etage",
+  "o-chambre-2": "prises-etage",
+  "o-suite-1": "prises-etage",
+  "o-suite-2": "prises-etage",
+  "s-salon": "salon-eclairage",
+  "s-cuisine": "cuisine-eclairage",
+  "s-chambre": "chambres-eclairage",
+  "s-suite": "chambres-eclairage",
+  "l-entree": "entree-eclairage",
+  "l-spot-1": "salon-eclairage",
+  "l-spot-2": "salon-eclairage",
+  "l-spot-3": "salon-eclairage",
+  "l-spot-4": "salon-eclairage",
+  "l-spot-5": "salon-eclairage",
+  "l-spot-6": "salon-eclairage",
+  "l-susp-1": "cuisine-eclairage",
+  "l-susp-2": "cuisine-eclairage",
+  "l-susp-3": "cuisine-eclairage",
+  "l-table": "table-eclairage",
+  "l-borne-1": "allee",
+  "l-borne-2": "allee",
+  "l-borne-3": "allee",
+  "l-palier": "chambres-eclairage",
+  "l-chambre": "chambres-eclairage",
+  "l-suite": "chambres-eclairage",
+  "l-sdb": "sdb-eclairage",
+  "l-sous-face-1": "sous-face",
+  "l-sous-face-2": "sous-face",
+  "l-sous-face-3": "sous-face",
+  "x-plaque": "plaque",
+  "x-four": "four",
+  "x-borne": "borne",
+  "x-pac": "pac",
+  "x-pv": "pv",
+  "x-onduleur": "pv",
+  "x-seche": "seche",
+};
+
+/** Luminaires commanded by each switch. */
+export const SWITCH_LIGHTS: Record<string, string[]> = {
+  "s-salon": ["l-spot-1", "l-spot-2", "l-spot-3", "l-spot-4", "l-spot-5", "l-spot-6"],
+  "s-cuisine": ["l-susp-1", "l-susp-2", "l-susp-3"],
+  "s-chambre": ["l-chambre"],
+  "s-suite": ["l-suite"],
+};
+
 export const deviceById = (id: string) => DEVICES.find((d) => d.id === id);
 export const roomById = (id: string) => ROOMS.find((r) => r.id === id);
 
@@ -227,8 +283,37 @@ export type Circuit = {
   level: Level; // "upper" circuits move with the upper floor
   /** Distance already travelled by the current when this path starts (m). */
   start: number;
+  /** Circuit group (a breaker in the panel): branches of one group light up together. */
+  group: string;
   points: V3[];
 };
+
+export type CircuitGroup = { id: string; label: string; kind: CircuitKind; upper?: boolean };
+
+/** One entry per protected circuit leaving the distribution board. */
+export const GROUPS: CircuitGroup[] = [
+  { id: "colonne", label: "Colonne montante vers l’étage", kind: "light" },
+  { id: "salon-eclairage", label: "Éclairage — Salon", kind: "light" },
+  { id: "entree-eclairage", label: "Éclairage — Entrée", kind: "light" },
+  { id: "cuisine-eclairage", label: "Éclairage — Îlot de cuisine", kind: "light" },
+  { id: "table-eclairage", label: "Éclairage — Salle à manger", kind: "light" },
+  { id: "allee", label: "Éclairage extérieur — Allée", kind: "light" },
+  { id: "chambres-eclairage", label: "Éclairage — Chambres & palier", kind: "light", upper: true },
+  { id: "sdb-eclairage", label: "Éclairage — Salle de bains", kind: "light", upper: true },
+  { id: "sous-face", label: "Éclairage extérieur — Terrasse", kind: "light", upper: true },
+  { id: "prises-salon", label: "Prises — Salon", kind: "outlet" },
+  { id: "prises-cuisine", label: "Prises — Plan de travail", kind: "outlet" },
+  { id: "prises-etage", label: "Prises — Chambres", kind: "outlet", upper: true },
+  { id: "plaque", label: "Circuit spécialisé — Plaque de cuisson", kind: "special" },
+  { id: "four", label: "Circuit spécialisé — Four", kind: "special" },
+  { id: "borne", label: "Circuit spécialisé — Borne de recharge", kind: "special" },
+  { id: "pv", label: "Circuit spécialisé — Photovoltaïque", kind: "special" },
+  { id: "pac", label: "Circuit spécialisé — Pompe à chaleur", kind: "special" },
+  { id: "seche", label: "Circuit spécialisé — Sèche-serviettes", kind: "special", upper: true },
+];
+
+export const groupIndex = (id: string) => GROUPS.findIndex((g) => g.id === id);
+export const groupById = (id: string) => GROUPS.find((g) => g.id === id);
 
 const C = H.groundCeil - 0.12; // ceiling run, ground floor
 const UC = H.upperCeil - 0.12; // ceiling run, upper floor
@@ -240,6 +325,7 @@ export const CIRCUITS: Circuit[] = [
   // ---------- Ground floor — lighting
   {
     id: "c-salon-spots",
+    group: "salon-eclairage",
     kind: "light",
     level: "ground",
     start: 0,
@@ -247,13 +333,33 @@ export const CIRCUITS: Circuit[] = [
   },
   {
     id: "c-entree",
+    group: "entree-eclairage",
     kind: "light",
     level: "ground",
     start: 0,
-    points: [[-5.62, 1.9, 1.33], [-5.62, C, 1.33], [-5.62, C, 2.8], [-3.5, C, 2.8], [-3.5, C, 1.95], [-3.5, 1.15, 1.95]],
+    points: [[-5.62, 1.9, 1.33], [-5.62, C, 1.33], [-5.62, C, 2.8], [-5.2, C, 2.8]],
+  },
+  {
+    // branch of the living-room lighting circuit going down to its switch
+    id: "c-salon-inter",
+    group: "salon-eclairage",
+    kind: "light",
+    level: "ground",
+    start: 3.45,
+    points: [[-3.5, C, 1.5], [-3.5, C, 1.95], [-3.5, 1.15, 1.95]],
+  },
+  {
+    // branch of the kitchen lighting circuit going down to its switch
+    id: "c-cuisine-inter",
+    group: "cuisine-eclairage",
+    kind: "light",
+    level: "ground",
+    start: 10.0,
+    points: [[3.2, C, 0.9], [3.2, C, -4.12], [3.2, 1.35, -4.12]],
   },
   {
     id: "c-cuisine-susp",
+    group: "cuisine-eclairage",
     kind: "light",
     level: "ground",
     start: 0,
@@ -261,6 +367,7 @@ export const CIRCUITS: Circuit[] = [
   },
   {
     id: "c-table",
+    group: "table-eclairage",
     kind: "light",
     level: "ground",
     start: 0,
@@ -268,6 +375,7 @@ export const CIRCUITS: Circuit[] = [
   },
   {
     id: "c-allee",
+    group: "allee",
     kind: "light",
     level: "ground",
     start: 0,
@@ -276,6 +384,7 @@ export const CIRCUITS: Circuit[] = [
   // ---------- Riser feeding the upper floor (ground part)
   {
     id: "c-colonne",
+    group: "colonne",
     kind: "light",
     level: "ground",
     start: 0,
@@ -284,6 +393,7 @@ export const CIRCUITS: Circuit[] = [
   // ---------- Ground floor — outlets
   {
     id: "c-prises-salon",
+    group: "prises-salon",
     kind: "outlet",
     level: "ground",
     start: 0,
@@ -291,6 +401,7 @@ export const CIRCUITS: Circuit[] = [
   },
   {
     id: "c-prises-cuisine",
+    group: "prises-cuisine",
     kind: "outlet",
     level: "ground",
     start: 0,
@@ -299,6 +410,7 @@ export const CIRCUITS: Circuit[] = [
   // ---------- Ground floor — specialised
   {
     id: "c-plaque",
+    group: "plaque",
     kind: "special",
     level: "ground",
     start: 0,
@@ -306,6 +418,7 @@ export const CIRCUITS: Circuit[] = [
   },
   {
     id: "c-four",
+    group: "four",
     kind: "special",
     level: "ground",
     start: 0,
@@ -313,6 +426,7 @@ export const CIRCUITS: Circuit[] = [
   },
   {
     id: "c-borne",
+    group: "borne",
     kind: "special",
     level: "ground",
     start: 0,
@@ -320,6 +434,7 @@ export const CIRCUITS: Circuit[] = [
   },
   {
     id: "c-onduleur",
+    group: "pv",
     kind: "special",
     level: "ground",
     start: 0,
@@ -327,6 +442,7 @@ export const CIRCUITS: Circuit[] = [
   },
   {
     id: "c-pv-descente",
+    group: "pv",
     kind: "special",
     level: "ground",
     start: 0.2,
@@ -334,6 +450,7 @@ export const CIRCUITS: Circuit[] = [
   },
   {
     id: "c-pac",
+    group: "pac",
     kind: "special",
     level: "ground",
     start: 0,
@@ -342,6 +459,7 @@ export const CIRCUITS: Circuit[] = [
   // ---------- Upper floor (moves with the floor)
   {
     id: "c-chambres",
+    group: "chambres-eclairage",
     kind: "light",
     level: "upper",
     start: UP_START,
@@ -349,6 +467,7 @@ export const CIRCUITS: Circuit[] = [
   },
   {
     id: "c-sdb",
+    group: "sdb-eclairage",
     kind: "light",
     level: "upper",
     start: UP_START,
@@ -356,6 +475,7 @@ export const CIRCUITS: Circuit[] = [
   },
   {
     id: "c-inter-chambre",
+    group: "chambres-eclairage",
     kind: "light",
     level: "upper",
     start: UP_START,
@@ -363,6 +483,7 @@ export const CIRCUITS: Circuit[] = [
   },
   {
     id: "c-inter-suite",
+    group: "chambres-eclairage",
     kind: "light",
     level: "upper",
     start: UP_START,
@@ -370,6 +491,7 @@ export const CIRCUITS: Circuit[] = [
   },
   {
     id: "c-sous-face",
+    group: "sous-face",
     kind: "light",
     level: "upper",
     start: UP_START,
@@ -377,6 +499,7 @@ export const CIRCUITS: Circuit[] = [
   },
   {
     id: "c-prises-etage",
+    group: "prises-etage",
     kind: "outlet",
     level: "upper",
     start: UP_START,
@@ -384,6 +507,7 @@ export const CIRCUITS: Circuit[] = [
   },
   {
     id: "c-seche",
+    group: "seche",
     kind: "special",
     level: "upper",
     start: UP_START,

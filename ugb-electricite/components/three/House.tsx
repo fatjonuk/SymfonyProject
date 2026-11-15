@@ -3,7 +3,7 @@
 import { useFrame } from "@react-three/fiber";
 import { useMemo, useRef } from "react";
 import * as THREE from "three";
-import { A, EXPLODE } from "@/lib/anim";
+import { A, EXPLODE, K } from "@/lib/anim";
 import { useUI } from "@/lib/store";
 import { Circuits, RiserBridge } from "./Circuits";
 import { CIRCUIT_COLORS, H, ROOMS, type Room } from "./data";
@@ -69,12 +69,8 @@ function RoomFloor({ room }: { room: Room }) {
     cur.current += (on - cur.current) * Math.min(1, dt * 8);
     mat.emissiveIntensity = cur.current;
   });
-  const focus = () => {
-    const lift = room.level === "upper" ? A.floor * EXPLODE.floorLift : 0;
-    return new THREE.Vector3(room.focus.target[0], room.focus.target[1] + lift, room.focus.target[2]);
-  };
   return (
-    <group position={[0, room.y + 0.004, 0]} {...interactive("room", room.id, room.focus.dist, focus)}>
+    <group position={[0, room.y + 0.004, 0]} {...interactive("room", room.id)}>
       {geos.map((g, i) => (
         <mesh key={i} geometry={g} material={mat} receiveShadow />
       ))}
@@ -180,14 +176,14 @@ function Roof() {
         <boxGeometry args={[15.6, 0.02, 8.3]} />
       </mesh>
       {/* photovoltaic array — clickable as a whole */}
-      <group {...interactive("device", "x-pv", 16, pvFocus)}>
+      <group {...interactive("device", "x-pv")}>
         {/* invisible, slightly larger hit area so the thin panels are easy to tap */}
         <mesh position={[2.2, top + 0.35, -2.0]}>
           <boxGeometry args={[7.2, 0.7, 4.2]} />
           <meshBasicMaterial transparent opacity={0} depthWrite={false} colorWrite={false} />
         </mesh>
         <group position={[2.2, top + 1.0, -2.0]}>
-          <Halo id="x-pv" color={CIRCUIT_COLORS.special} size={3.2} strength={() => A.devices * 0.55} />
+          <Halo id="x-pv" color={CIRCUIT_COLORS.special} size={3.2} strength={() => A.devices * K.special * 0.55} />
         </group>
       {pv.map(([x, z], i) => (
         <group key={i} position={[x, top + 0.32, z]} rotation={[-0.2, 0, 0]}>
@@ -203,8 +199,6 @@ function Roof() {
     </group>
   );
 }
-
-const pvFocus = () => new THREE.Vector3(2.2, 6.9 + A.floor * EXPLODE.floorLift + A.roof * EXPLODE.roofLift, -2.0);
 
 export function House() {
   const upper = useRef<THREE.Group>(null);

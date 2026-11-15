@@ -1,34 +1,102 @@
 "use client";
 
+import gsap from "gsap";
 import dynamic from "next/dynamic";
 import { useEffect, useRef, useState } from "react";
-import { A, EXPLODE, flyTo, overview, playIntro, setCircuits, setFramingOffset, setOpen, skipIntro } from "@/lib/anim";
-import { useUI } from "@/lib/store";
-import { CIRCUIT_COLORS, CIRCUIT_LABELS, DEVICES, deviceById, roomById, type CircuitKind, type Device } from "@/components/three/data";
+import {
+  SCROLL,
+  clearSelection,
+  goToExplore,
+  initScroll,
+  initStatic,
+  replay,
+  resetCamera,
+  rotateBy,
+  selectDevice,
+  selectRoom,
+  setFilter,
+  setOpen,
+  switchIsOn,
+  toggleLight,
+  toggleSwitch,
+  zoomBy,
+} from "@/lib/anim";
+import { useUI, type CircuitFilter } from "@/lib/store";
+import {
+  CIRCUIT_COLORS,
+  DEVICES,
+  DEVICE_CIRCUIT,
+  SWITCH_LIGHTS,
+  deviceById,
+  groupById,
+  roomById,
+  type Device,
+} from "@/components/three/data";
 import {
   IconArrow,
-  IconCircuit,
+  IconBolt,
   IconClose,
   IconCube,
-  IconHand,
+  IconEyeOff,
+  IconMinus,
   IconOpen,
+  IconPlus,
+  IconPower,
   IconReplay,
-  IconSkip,
+  IconRotateLeft,
+  IconRotateRight,
   IconTarget,
   IconX,
 } from "./Icons";
 
 const Experience = dynamic(() => import("@/components/three/Experience"), { ssr: false });
 
-const STEPS = ["Maison", "Décomposition", "Tableau électrique", "Réseaux", "Activation"];
+/** Chapters of the scroll sequence (bounds in % of the timeline). */
+const CHAPTERS: { label: string; short?: string; text: string }[] = [
+  { label: "Maison", text: "Une installation électrique pensée dans les moindres détails." },
+  { label: "Décomposition", text: "Toiture, façades, étage : la maison s’ouvre et révèle ce qui ne se voit pas." },
+  { label: "Tableau électrique", short: "Tableau", text: "Le tableau électrique : le cœur de votre installation." },
+  { label: "Circuits", text: "Chaque circuit, une installation maîtrisée." },
+  { label: "Exploration", text: "Explorez notre savoir-faire." },
+];
+const BOUNDS = [0, 15, 40, 55, 80, 100];
 
-const TYPE_LABEL: Record<Device["type"], { label: string; color: string }> = {
-  panel: { label: "Tableau", color: "#F2B705" },
-  outlet: { label: "Prise", color: CIRCUIT_COLORS.outlet },
-  switch: { label: "Commande", color: CIRCUIT_COLORS.light },
-  light: { label: "Éclairage", color: CIRCUIT_COLORS.light },
-  special: { label: "Circuit spécialisé", color: CIRCUIT_COLORS.special },
+/** Titles and descriptions shown when a device is selected. */
+const TYPE_INFO: Record<Device["type"], { tag: string; color: string; title?: string; text?: string }> = {
+  panel: {
+    tag: "Tableau",
+    color: "#F2B705",
+    title: "Tableau électrique",
+    text: "Distribution, protection et organisation des circuits électriques de votre habitation.",
+  },
+  outlet: {
+    tag: "Prise",
+    color: CIRCUIT_COLORS.outlet,
+    title: "Installation de prises électriques",
+    text: "Des installations adaptées aux usages de chaque pièce.",
+  },
+  light: {
+    tag: "Luminaire",
+    color: CIRCUIT_COLORS.light,
+    title: "Éclairage intérieur et extérieur",
+    text: "Des solutions d’éclairage fonctionnelles et esthétiques.",
+  },
+  switch: {
+    tag: "Interrupteur",
+    color: CIRCUIT_COLORS.light,
+    title: "Commandes d’éclairage",
+    text: "Des commandes pratiques, intégrées à votre installation.",
+  },
+  special: { tag: "Circuit spécialisé", color: CIRCUIT_COLORS.special },
 };
+
+const FILTERS: { id: CircuitFilter; label: string; color?: string }[] = [
+  { id: "all", label: "Tous les circuits" },
+  { id: "light", label: "Éclairage", color: CIRCUIT_COLORS.light },
+  { id: "outlet", label: "Prises", color: CIRCUIT_COLORS.outlet },
+  { id: "special", label: "Spécialisés", color: CIRCUIT_COLORS.special },
+  { id: "none", label: "Masquer" },
+];
 
 function hasWebGL() {
   try {
@@ -39,48 +107,172 @@ function hasWebGL() {
   }
 }
 
-function focusDevice(d: Device) {
-  const lift =
-    d.level === "upper"
-      ? A.floor * EXPLODE.floorLift
-      : d.level === "roof"
-        ? A.floor * EXPLODE.floorLift + A.roof * EXPLODE.roofLift
-        : 0;
-  useUI.getState().set({ selected: { kind: "device", id: d.id } });
-  flyTo([d.pos[0], d.pos[1] + lift, d.pos[2]], d.type === "panel" ? 6 : d.level === "roof" ? 16 : 8);
-}
-
-function focusRoom(id: string) {
-  const r = roomById(id);
-  if (!r) return;
-  const lift = r.level === "upper" ? A.floor * EXPLODE.floorLift : 0;
-  useUI.getState().set({ selected: { kind: "room", id } });
-  flyTo([r.focus.target[0], r.focus.target[1] + lift, r.focus.target[2]], r.focus.dist);
-}
-
+/* ------------------------------------------------------------------ */
+/* Copy synchronised with the scroll                                   */
 /* ------------------------------------------------------------------ */
 
+function Eyebrow({ index }: { index: number }) {
+  return (
+    <p className="flex items-center gap-3 text-[0.7rem] font-bold uppercase tracking-[0.3em] text-night/60">
+      <span className="h-px w-8 bg-volt" />
+      <span className="tabular-nums">0{index + 1}</span>
+      {CHAPTERS[index].label}
+    </p>
+  );
+}
+
+function CircuitFilters() {
+  const filter = useUI((s) => s.filter);
+  return (
+    <div
+      className="-mx-5 mt-5 flex gap-1.5 overflow-x-auto px-5 pb-1 [scrollbar-width:none] sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0"
+      role="group"
+      aria-label="Circuits affichés"
+    >
+      {FILTERS.map((f) => (
+        <button key={f.id} className="filter-chip" aria-pressed={filter === f.id} onClick={() => setFilter(f.id)}>
+          {f.color ? (
+            <span className="h-2 w-2 rounded-full" style={{ background: f.color }} />
+          ) : f.id === "none" ? (
+            <IconEyeOff size={14} />
+          ) : null}
+          {f.label}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+function Legend() {
+  return (
+    <ul className="mt-5 flex flex-wrap gap-x-5 gap-y-2">
+      {FILTERS.filter((f) => f.color).map((f) => (
+        <li key={f.id} className="flex items-center gap-2 text-[0.8rem] font-semibold text-night/80">
+          <span className="h-[3px] w-6 rounded-full" style={{ background: f.color, boxShadow: `0 0 10px ${f.color}` }} />
+          {f.id === "special" ? "Circuits spécialisés" : f.label}
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+function Copy({ isStatic }: { isStatic: boolean }) {
+  const step = useUI((s) => s.step);
+  const explore = useUI((s) => s.mode === "explore");
+  const hasPanel = useUI((s) => !!s.selected);
+  const show = (on: boolean) =>
+    `transition-all duration-700 ease-[cubic-bezier(.22,1,.36,1)] ${on ? "opacity-100 translate-y-0" : "pointer-events-none opacity-0 translate-y-3"}`;
+
+  return (
+    <div
+      className={`pointer-events-none absolute inset-x-0 top-0 z-10 px-5 pt-28 transition-opacity duration-500 sm:px-8 lg:inset-y-0 lg:left-[6vw] lg:right-auto lg:flex lg:w-[min(32rem,34vw)] lg:items-center lg:px-0 lg:pt-0 ${
+        hasPanel ? "max-lg:opacity-0" : ""
+      }`}
+    >
+      <div className="relative w-full max-w-xl">
+        {/* 01 — hero copy, shown while the house is still closed */}
+        <div className={show(step === 0)} aria-hidden={step !== 0}>
+          <p className="flex items-center gap-3 text-[0.72rem] font-bold uppercase tracking-[0.32em] text-night/70">
+            <span className="h-px w-8 bg-volt" />
+            UGB Électricité
+          </p>
+          <h1 className="mt-5 text-[clamp(2.05rem,4.4vw,4.1rem)] font-semibold leading-[1.02] tracking-[-0.035em] text-night">
+            L’énergie de vos projets, <span className="serif-accent block text-[1.08em] text-night/85">la confiance en plus.</span>
+          </h1>
+          <p className="mt-4 max-w-md text-[0.98rem] leading-relaxed text-mute sm:mt-5">{CHAPTERS[0].text}</p>
+          <div className={`mt-6 flex flex-wrap gap-3 sm:mt-7 ${step === 0 ? "pointer-events-auto" : ""}`}>
+            <a href="#prestations" className="btn btn-primary" tabIndex={step === 0 ? 0 : -1}>
+              Découvrir notre savoir-faire <IconArrow size={17} className="btn-arrow" />
+            </a>
+            {!isStatic && (
+              <button onClick={goToExplore} className="btn btn-ghost" tabIndex={step === 0 ? 0 : -1}>
+                <IconCube size={17} /> Explorer l’installation 3D
+              </button>
+            )}
+          </div>
+          {isStatic && explore && (
+            <div className="pointer-events-auto">
+              <CircuitFilters />
+            </div>
+          )}
+        </div>
+
+        {/* 02 → 05 — one short line per chapter */}
+        {CHAPTERS.map((c, i) =>
+          i === 0 ? null : (
+            <div key={c.label} className={`absolute inset-x-0 top-0 lg:top-1/2 lg:-translate-y-1/2`} aria-hidden={step !== i}>
+              <div className={show(step === i)}>
+                {/* while an info panel is open the headline steps aside: the scene comes first */}
+                <div className={`transition-opacity duration-500 ${i === 4 && hasPanel ? "opacity-0" : ""}`}>
+                  <Eyebrow index={i} />
+                  <p className="serif-accent mt-4 text-[clamp(1.7rem,3.3vw,3.1rem)] leading-[1.08] text-night sm:mt-5">{c.text}</p>
+                </div>
+                {i === 3 && <Legend />}
+                {i === 4 && (
+                  <div className={show(explore) + (explore && step === 4 ? " pointer-events-auto" : "")}>
+                    <p
+                      className={`mt-4 hidden max-w-sm text-[0.95rem] leading-relaxed text-mute transition-opacity duration-500 sm:block ${
+                        hasPanel ? "opacity-0" : ""
+                      }`}
+                    >
+                      Faites glisser pour tourner autour de la maison, puis cliquez sur un équipement pour afficher son circuit.
+                    </p>
+                    <CircuitFilters />
+                  </div>
+                )}
+              </div>
+            </div>
+          ),
+        )}
+      </div>
+    </div>
+  );
+}
+
+/** Progress of the sequence, one segment per chapter. Updated outside React. */
 function PhaseRail() {
   const step = useUI((s) => s.step);
-  const playing = useUI((s) => s.playing);
-  if (!playing) return null;
+  const explore = useUI((s) => s.mode === "explore");
+  const bars = useRef<(HTMLDivElement | null)[]>([]);
+
+  useEffect(() => {
+    const tick = () => {
+      const t = SCROLL.p * 100;
+      bars.current.forEach((el, i) => {
+        if (!el) return;
+        const f = Math.min(1, Math.max(0, (t - BOUNDS[i]) / (BOUNDS[i + 1] - BOUNDS[i])));
+        el.style.transform = `scaleX(${f})`;
+      });
+    };
+    gsap.ticker.add(tick);
+    return () => gsap.ticker.remove(tick);
+  }, []);
+
   return (
-    <div className="pointer-events-none absolute bottom-[6.5rem] left-1/2 z-20 w-[min(92vw,34rem)] -translate-x-1/2 lg:bottom-9 lg:left-[6vw] lg:translate-x-0">
+    <div
+      className={`pointer-events-none absolute inset-x-5 bottom-6 z-20 transition-opacity duration-500 lg:inset-x-auto lg:bottom-9 lg:left-[6vw] lg:w-[min(32rem,34vw)] ${
+        explore ? "max-lg:opacity-0" : ""
+      }`}
+      aria-hidden
+    >
       <div className="flex items-center gap-2">
-        {STEPS.map((s, i) => (
-          <div key={s} className="flex-1">
+        {CHAPTERS.map((c, i) => (
+          <div key={c.label} className="flex-1">
             <div className="h-[3px] overflow-hidden rounded-full bg-night/12">
               <div
-                className="h-full rounded-full bg-night transition-[width] duration-[1200ms] ease-out"
-                style={{ width: i < step ? "100%" : i === step ? "60%" : "0%" }}
+                ref={(el) => {
+                  bars.current[i] = el;
+                }}
+                className="h-full origin-left rounded-full bg-night"
+                style={{ transform: "scaleX(0)" }}
               />
             </div>
             <p
-              className={`mt-2 hidden text-[0.68rem] font-semibold uppercase tracking-[0.16em] transition-colors duration-500 sm:block ${
+              className={`mt-2 hidden text-[0.64rem] font-semibold uppercase tracking-[0.14em] transition-colors duration-500 xl:block ${
                 i === step ? "text-night" : "text-night/35"
               }`}
             >
-              <span className="mr-1 tabular-nums">0{i + 1}</span> {s}
+              {c.short ?? c.label}
             </p>
           </div>
         ))}
@@ -89,216 +281,247 @@ function PhaseRail() {
   );
 }
 
-function Legend() {
-  const circuits = useUI((s) => s.circuits);
-  const step = useUI((s) => s.step);
-  const explore = useUI((s) => s.explore);
-  const show = circuits || step >= 3;
+function ScrollHint() {
+  const show = useUI((s) => s.step === 0 && s.mode === "timeline" && s.ready);
   return (
     <div
-      className={`pointer-events-none absolute right-4 top-24 z-20 ${explore ? "block" : "hidden sm:block"} rounded-2xl bg-white/75 px-4 py-3 shadow-[0_20px_50px_-30px_rgba(13,27,61,0.5)] backdrop-blur-md transition-all duration-700 sm:right-8 sm:top-28 ${
-        show ? "translate-y-0 opacity-100" : "-translate-y-2 opacity-0"
+      className={`pointer-events-none absolute bottom-12 left-1/2 z-20 flex -translate-x-1/2 flex-col items-center gap-2 rounded-3xl bg-ivory/75 px-4 py-3 backdrop-blur-sm transition-opacity duration-700 lg:bottom-7 lg:bg-transparent lg:backdrop-blur-none ${
+        show ? "opacity-100" : "opacity-0"
       }`}
+      aria-hidden={!show}
     >
-      <p className="mb-2 text-[0.62rem] font-bold uppercase tracking-[0.2em] text-night/50">Réseau électrique</p>
-      <ul className="space-y-1.5">
-        {(Object.keys(CIRCUIT_LABELS) as CircuitKind[]).map((k) => (
-          <li key={k} className="flex items-center gap-2.5 text-[0.78rem] font-semibold text-night">
-            <span className="h-[3px] w-6 rounded-full" style={{ background: CIRCUIT_COLORS[k], boxShadow: `0 0 10px ${CIRCUIT_COLORS[k]}` }} />
-            {CIRCUIT_LABELS[k]}
-          </li>
-        ))}
-      </ul>
+      <span className="scroll-mouse" />
+      <span className="text-[0.66rem] font-bold uppercase tracking-[0.24em] text-night/55">Faites défiler</span>
     </div>
   );
 }
 
-function InfoCard() {
-  const selected = useUI((s) => s.selected);
-  const set = useUI((s) => s.set);
-  if (!selected) return null;
+/* ------------------------------------------------------------------ */
+/* Exploration mode                                                    */
+/* ------------------------------------------------------------------ */
 
-  let body: React.ReactNode = null;
-  if (selected.kind === "device") {
-    const d = deviceById(selected.id);
-    if (!d) return null;
-    const t = TYPE_LABEL[d.type];
-    const room = roomById(d.room);
-    body = (
-      <>
-        <span className="inline-flex items-center gap-2 rounded-full bg-night/5 px-2.5 py-1 text-[0.66rem] font-bold uppercase tracking-[0.16em] text-night/70">
-          <span className="h-2 w-2 rounded-full" style={{ background: t.color }} />
-          {t.label}
-        </span>
-        <h3 className="mt-3 text-xl font-bold leading-tight text-night">{d.title}</h3>
-        <p className="mt-2 text-sm leading-relaxed text-mute">{d.text}</p>
-        {d.specs && (
-          <ul className="mt-4 space-y-1.5 border-t border-night/10 pt-4">
-            {d.specs.map((s) => (
-              <li key={s} className="flex gap-2 text-[0.8rem] font-medium text-night/80">
-                <span className="mt-[0.45rem] h-1 w-1 shrink-0 rounded-full bg-volt" />
-                {s}
-              </li>
-            ))}
-          </ul>
-        )}
-        {room && (
-          <button onClick={() => focusRoom(room.id)} className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-night hover:text-night/70">
-            Voir la pièce : {room.name} <IconArrow size={16} />
-          </button>
-        )}
-      </>
-    );
-  } else {
-    const r = roomById(selected.id);
-    if (!r) return null;
-    const list = DEVICES.filter((d) => d.room === r.id);
-    const count = (ty: Device["type"]) => list.filter((d) => d.type === ty).length;
-    const stats = [
-      { n: count("outlet"), l: "prises" },
-      { n: count("light"), l: "points lumineux" },
-      { n: count("switch"), l: "commandes" },
-      { n: count("special") + count("panel"), l: "circuits dédiés" },
-    ].filter((s) => s.n > 0);
-    body = (
-      <>
-        <span className="inline-flex items-center gap-2 rounded-full bg-night/5 px-2.5 py-1 text-[0.66rem] font-bold uppercase tracking-[0.16em] text-night/70">
-          <span className="h-2 w-2 rounded-full bg-volt" />
-          Pièce
-        </span>
-        <h3 className="mt-3 text-xl font-bold leading-tight text-night">Installation électrique — {r.name}</h3>
-        <p className="mt-2 text-sm leading-relaxed text-mute">{r.text}</p>
-        {stats.length > 0 && (
-          <div className="mt-4 grid grid-cols-2 gap-2">
-            {stats.map((s) => (
-              <div key={s.l} className="rounded-xl bg-ivory px-3 py-2.5">
-                <p className="text-lg font-bold text-night tabular-nums">{s.n}</p>
-                <p className="text-[0.72rem] font-medium text-mute">{s.l}</p>
-              </div>
-            ))}
+function Tag({ color, children }: { color: string; children: React.ReactNode }) {
+  return (
+    <span className="inline-flex items-center gap-2 rounded-full bg-night/5 px-2.5 py-1 text-[0.66rem] font-bold uppercase tracking-[0.16em] text-night/70">
+      <span className="h-2 w-2 rounded-full" style={{ background: color }} />
+      {children}
+    </span>
+  );
+}
+
+function DeviceCard({ d }: { d: Device }) {
+  const off = useUI((s) => s.off);
+  const filter = useUI((s) => s.filter);
+  const info = TYPE_INFO[d.type];
+  const room = roomById(d.room);
+  const group = groupById(DEVICE_CIRCUIT[d.id] ?? "");
+  const generic = !!info.title;
+  const lit = !off[d.id];
+  const swOn = switchIsOn(d.id, off);
+
+  return (
+    <>
+      <Tag color={info.color}>{info.tag}</Tag>
+      <h3 className="mt-3 pr-6 text-xl font-bold leading-tight text-night">{info.title ?? d.title}</h3>
+      <p className="mt-2 text-sm leading-relaxed text-mute">{info.text ?? d.text}</p>
+
+      {/* the device that was clicked, and the circuit feeding it */}
+      <dl className="mt-4 space-y-2.5 border-t border-night/10 pt-4 text-[0.82rem]">
+        {generic && d.type !== "panel" && (
+          <div>
+            <dt className="font-bold text-night">{d.title}</dt>
+            <dd className="mt-0.5 leading-snug text-mute">{d.text}</dd>
           </div>
         )}
-        {list.length > 0 && (
-          <ul className="mt-4 max-h-36 space-y-1 overflow-auto border-t border-night/10 pt-3 pr-1">
-            {list.map((d) => (
-              <li key={d.id}>
-                <button
-                  onClick={() => focusDevice(d)}
-                  className="flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-left text-[0.8rem] font-medium text-night/80 hover:bg-night/5"
-                >
-                  <span className="h-2 w-2 shrink-0 rounded-full" style={{ background: TYPE_LABEL[d.type].color }} />
-                  {d.title}
-                </button>
-              </li>
-            ))}
-          </ul>
+        {group && (
+          <div className="flex items-center gap-2">
+            <dt className="text-night/50">Circuit</dt>
+            <dd className="flex items-center gap-2 font-semibold text-night">
+              <span className="h-[3px] w-5 rounded-full" style={{ background: CIRCUIT_COLORS[group.kind] }} />
+              {group.label}
+            </dd>
+          </div>
         )}
-      </>
-    );
-  }
+      </dl>
 
+      {d.type === "light" && (
+        <button className="card-action mt-4" aria-pressed={lit} onClick={() => toggleLight(d.id)}>
+          <IconPower size={16} /> {lit ? "Éteindre ce luminaire" : "Allumer ce luminaire"}
+        </button>
+      )}
+      {d.type === "switch" && (
+        <button className="card-action mt-4" aria-pressed={swOn} onClick={() => toggleSwitch(d.id)}>
+          <IconPower size={16} /> {swOn ? "Éteindre" : "Allumer"} · {SWITCH_LIGHTS[d.id]?.length ?? 0} luminaire
+          {(SWITCH_LIGHTS[d.id]?.length ?? 0) > 1 ? "s" : ""}
+        </button>
+      )}
+      {d.type === "panel" && (
+        <div className="mt-4">
+          <p className="text-[0.7rem] font-bold uppercase tracking-[0.16em] text-night/50">Visualiser les circuits</p>
+          <div className="mt-2 flex flex-wrap gap-1.5">
+            {FILTERS.filter((f) => f.id !== "none").map((f) => (
+              <button key={f.id} className="filter-chip" aria-pressed={filter === f.id} onClick={() => setFilter(f.id)}>
+                {f.color && <span className="h-2 w-2 rounded-full" style={{ background: f.color }} />}
+                {f.label}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {d.specs && (
+        <ul className="mt-4 hidden space-y-1.5 border-t border-night/10 pt-4 sm:block">
+          {d.specs.map((s) => (
+            <li key={s} className="flex gap-2 text-[0.8rem] font-medium text-night/80">
+              <span className="mt-[0.45rem] h-1 w-1 shrink-0 rounded-full bg-volt" />
+              {s}
+            </li>
+          ))}
+        </ul>
+      )}
+
+      <div className="mt-5 flex flex-wrap items-center gap-x-5 gap-y-3">
+        <a href="#contact" className="btn btn-primary !px-4 !py-2.5 !text-[0.82rem]">
+          Demander un devis <IconArrow size={15} className="btn-arrow" />
+        </a>
+        {room && (
+          <button onClick={() => selectRoom(room.id)} className="text-[0.82rem] font-semibold text-night underline-offset-4 hover:underline">
+            Voir la pièce : {room.name}
+          </button>
+        )}
+      </div>
+    </>
+  );
+}
+
+function RoomCard({ id }: { id: string }) {
+  const r = roomById(id);
+  if (!r) return null;
+  const list = DEVICES.filter((d) => d.room === r.id);
+  const count = (ty: Device["type"]) => list.filter((d) => d.type === ty).length;
+  const stats = [
+    { n: count("outlet"), l: "prises" },
+    { n: count("light"), l: "points lumineux" },
+    { n: count("switch"), l: "commandes" },
+    { n: count("special") + count("panel"), l: "circuits dédiés" },
+  ].filter((s) => s.n > 0);
+  return (
+    <>
+      <Tag color="#F2B705">Pièce</Tag>
+      <h3 className="mt-3 pr-6 text-xl font-bold leading-tight text-night">Installation électrique — {r.name}</h3>
+      <p className="mt-2 text-sm leading-relaxed text-mute">{r.text}</p>
+      {stats.length > 0 && (
+        <div className="mt-4 grid grid-cols-2 gap-2">
+          {stats.map((s) => (
+            <div key={s.l} className="rounded-xl bg-ivory px-3 py-2.5">
+              <p className="text-lg font-bold tabular-nums text-night">{s.n}</p>
+              <p className="text-[0.72rem] font-medium text-mute">{s.l}</p>
+            </div>
+          ))}
+        </div>
+      )}
+      {list.length > 0 && (
+        <ul className="mt-4 max-h-40 space-y-1 overflow-auto border-t border-night/10 pt-3 pr-1">
+          {list.map((d) => (
+            <li key={d.id}>
+              <button
+                onClick={() => selectDevice(d.id)}
+                className="flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-left text-[0.8rem] font-medium text-night/80 hover:bg-night/5"
+              >
+                <span className="h-2 w-2 shrink-0 rounded-full" style={{ background: TYPE_INFO[d.type].color }} />
+                {d.title}
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+      <a href="#contact" className="btn btn-primary mt-5 !px-4 !py-2.5 !text-[0.82rem]">
+        Demander un devis <IconArrow size={15} className="btn-arrow" />
+      </a>
+    </>
+  );
+}
+
+function InfoPanel() {
+  const selected = useUI((s) => s.selected);
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && clearSelection();
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
+
+  if (!selected) return null;
+  const device = selected.kind === "device" ? deviceById(selected.id) : undefined;
   return (
     <aside
       key={selected.kind + selected.id}
-      className="fade-up absolute inset-x-3 bottom-[5.5rem] z-30 max-h-[55svh] overflow-auto rounded-3xl bg-white/92 p-5 shadow-[0_30px_80px_-30px_rgba(13,27,61,0.55)] backdrop-blur-xl sm:inset-x-auto sm:right-8 sm:top-1/2 sm:bottom-auto sm:w-[22rem] sm:-translate-y-1/2 sm:p-6"
+      className="fade-up absolute inset-x-3 bottom-4 z-30 max-h-[46svh] overflow-auto rounded-3xl bg-white/95 p-5 shadow-[0_30px_80px_-30px_rgba(13,27,61,0.55)] backdrop-blur-xl sm:inset-x-auto sm:bottom-auto sm:right-8 sm:top-28 sm:max-h-[calc(100svh-14rem)] sm:w-[22.5rem] sm:p-6"
       aria-live="polite"
     >
       <button
-        onClick={() => set({ selected: null })}
+        onClick={clearSelection}
         className="absolute right-4 top-4 rounded-full p-1.5 text-night/50 transition hover:bg-night/5 hover:text-night"
-        aria-label="Fermer"
+        aria-label="Fermer le panneau"
       >
         <IconX size={18} />
       </button>
-      {body}
+      {device ? <DeviceCard d={device} /> : <RoomCard id={selected.id} />}
     </aside>
   );
 }
 
-function Dock() {
-  const { playing, open, circuits, explore, set } = useUI();
+function Dock({ isStatic }: { isStatic: boolean }) {
+  const explore = useUI((s) => s.mode === "explore");
+  const open = useUI((s) => s.open);
+  const hasPanel = useUI((s) => !!s.selected);
   return (
-    <div className="absolute bottom-5 left-1/2 z-30 w-max max-w-[calc(100vw-1.5rem)] -translate-x-1/2 max-sm:w-[calc(100vw-1.5rem)] lg:bottom-8 lg:left-auto lg:right-8 lg:translate-x-0">
+    <div
+      className={`absolute bottom-5 left-1/2 z-30 w-max max-w-[calc(100vw-1.5rem)] -translate-x-1/2 transition-all duration-700 ease-[cubic-bezier(.22,1,.36,1)] lg:bottom-8 lg:left-auto lg:right-8 lg:translate-x-0 ${
+        explore ? "translate-y-0 opacity-100" : "pointer-events-none translate-y-4 opacity-0"
+      } ${hasPanel ? "max-sm:pointer-events-none max-sm:opacity-0" : ""}`}
+      aria-hidden={!explore}
+    >
       <div className="dock flex flex-wrap items-center justify-center gap-1 rounded-[1.6rem] p-1.5 sm:flex-nowrap sm:rounded-full">
-        {playing ? (
-          <button className="dock-btn" onClick={skipIntro}>
-            <IconSkip size={16} /> Passer l’animation
+        <button className="dock-btn dock-icon" onClick={() => rotateBy(-Math.PI / 4)} aria-label="Tourner la maison vers la gauche" title="Tourner à gauche">
+          <IconRotateLeft size={17} />
+        </button>
+        <button className="dock-btn dock-icon" onClick={() => rotateBy(Math.PI / 4)} aria-label="Tourner la maison vers la droite" title="Tourner à droite">
+          <IconRotateRight size={17} />
+        </button>
+        <button className="dock-btn dock-icon" onClick={() => zoomBy(1.3)} aria-label="Zoom arrière" title="Zoom arrière">
+          <IconMinus size={17} />
+        </button>
+        <button className="dock-btn dock-icon" onClick={() => zoomBy(0.75)} aria-label="Zoom avant" title="Zoom avant">
+          <IconPlus size={17} />
+        </button>
+        <button
+          className="dock-btn"
+          onClick={() => {
+            clearSelection();
+            resetCamera();
+          }}
+          title="Réinitialiser la caméra"
+        >
+          <IconTarget size={16} /> <span className="sm:hidden">Vue</span>
+          <span className="hidden sm:inline">Réinitialiser</span>
+        </button>
+        <span className="mx-1 hidden h-5 w-px bg-white/15 sm:block" />
+        <button className="dock-btn" onClick={() => selectDevice("panel")}>
+          <IconBolt size={16} /> Tableau
+        </button>
+        <button className="dock-btn" onClick={() => setOpen(!open)}>
+          {open ? <IconClose size={16} /> : <IconOpen size={16} />}
+          <span className="sm:hidden">{open ? "Fermer" : "Ouvrir"}</span>
+          <span className="hidden sm:inline">{open ? "Refermer la maison" : "Ouvrir la maison"}</span>
+        </button>
+        {!isStatic && (
+          <button className="dock-btn" onClick={replay}>
+            <IconReplay size={16} /> Rejouer
           </button>
-        ) : (
-          <>
-            <button className="dock-btn" aria-pressed={open} onClick={() => setOpen(!open)}>
-              {open ? <IconClose size={16} /> : <IconOpen size={16} />}
-              <span className="sm:hidden">{open ? "Fermer" : "Ouvrir"}</span>
-              <span className="hidden sm:inline">{open ? "Refermer la maison" : "Ouvrir la maison"}</span>
-            </button>
-            <button className="dock-btn" aria-pressed={circuits} onClick={() => setCircuits(!circuits)}>
-              <IconCircuit size={16} />
-              <span className="sm:hidden">Circuits</span>
-              <span className="hidden sm:inline">{circuits ? "Masquer les circuits" : "Afficher les circuits"}</span>
-            </button>
-            <button className="dock-btn" onClick={() => focusDevice(deviceById("panel")!)}>
-              <IconTarget size={16} /> Tableau
-            </button>
-            <button
-              className="dock-btn"
-              onClick={() => {
-                set({ selected: null });
-                overview();
-              }}
-            >
-              <IconCube size={16} /> <span className="sm:hidden">Vue</span>
-              <span className="hidden sm:inline">Vue d’ensemble</span>
-            </button>
-            <button className="dock-btn" onClick={playIntro}>
-              <IconReplay size={16} /> <span className="sm:hidden">Rejouer</span>
-              <span className="hidden sm:inline">Rejouer l’animation</span>
-            </button>
-            {explore && (
-              <button
-                className="dock-btn"
-                onClick={() => {
-                  set({ explore: false });
-                  setFramingOffset(0.17);
-                }}
-              >
-                <IconX size={16} /> Quitter
-              </button>
-            )}
-          </>
         )}
       </div>
     </div>
-  );
-}
-
-function FinalMessage() {
-  const show = useUI((s) => s.finalMessage);
-  const explore = useUI((s) => s.explore);
-  return (
-    <div
-      className={`pointer-events-none absolute inset-x-5 bottom-[5.6rem] z-20 transition-all duration-[1400ms] ease-[cubic-bezier(.22,1,.36,1)] lg:inset-x-auto lg:bottom-9 lg:left-[6vw] lg:w-[min(30rem,34vw)] ${
-        show && !explore ? "translate-y-0 opacity-100" : "translate-y-4 opacity-0"
-      }`}
-    >
-      <div className="flex items-start gap-3 border-l-2 border-volt pl-4">
-        <p className="serif-accent text-[clamp(1.25rem,1.9vw,1.7rem)] leading-snug text-night">
-          Une installation maîtrisée, du tableau jusqu’au dernier luminaire.
-        </p>
-      </div>
-    </div>
-  );
-}
-
-function Hint() {
-  const playing = useUI((s) => s.playing);
-  const ready = useUI((s) => s.ready);
-  const explore = useUI((s) => s.explore);
-  if (playing || !ready) return null;
-  return (
-    <p className="fade-up pointer-events-none absolute bottom-[4.6rem] left-1/2 z-20 hidden -translate-x-1/2 items-center gap-2 text-[0.72rem] font-medium text-night/55 sm:flex lg:bottom-[5.6rem] lg:left-auto lg:right-10 lg:translate-x-0">
-      <IconHand size={15} />
-      {explore ? "Glisser pour tourner · molette pour zoomer · clic droit pour déplacer" : "Glisser pour tourner · cliquez sur une pièce ou un équipement"}
-    </p>
   );
 }
 
@@ -322,6 +545,7 @@ function Loader() {
   );
 }
 
+/** Simplified experience for devices that cannot display the 3D scene. */
 function Fallback() {
   return (
     <div className="absolute inset-0 flex items-end justify-center lg:items-center lg:justify-end lg:pr-[4vw]">
@@ -335,77 +559,54 @@ function Fallback() {
 
 export function Hero() {
   const section = useRef<HTMLElement>(null);
+  const stage = useRef<HTMLDivElement>(null);
   const [webgl, setWebgl] = useState<boolean | null>(null);
   const [visible, setVisible] = useState(true);
-  const explore = useUI((s) => s.explore);
-  const set = useUI((s) => s.set);
+  const [isStatic, setStatic] = useState(false);
 
   useEffect(() => {
-    setWebgl(hasWebGL());
     const el = section.current;
-    if (!el) return;
-    const io = new IntersectionObserver(([e]) => setVisible(e.isIntersecting), { threshold: 0.02 });
+    const pin = stage.current;
+    if (!el || !pin) return;
+    const ok = hasWebGL();
+    setWebgl(ok);
+    // Rendering is paused whenever the 3D stage is off screen.
+    const io = new IntersectionObserver(([e]) => setVisible(e.isIntersecting));
     io.observe(el);
-    return () => io.disconnect();
+    let cleanup = () => {};
+    if (ok) {
+      // Reduced motion: no scroll-driven sequence, the open house is shown directly.
+      const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      setStatic(reduce);
+      cleanup = reduce ? initStatic() : initScroll(el, pin);
+    }
+    return () => {
+      io.disconnect();
+      cleanup();
+    };
   }, []);
 
-  const startExplore = () => {
-    skipIntro();
-    set({ explore: true });
-    setFramingOffset(0);
-    if (!useUI.getState().open) setOpen(true);
-    if (!useUI.getState().circuits) setCircuits(true);
-    section.current?.scrollIntoView({ behavior: "smooth" });
-  };
-
   return (
-    <section ref={section} id="accueil" className="relative h-[100svh] min-h-[640px] w-full overflow-hidden bg-ivory">
-      <div className="absolute inset-0">
-        {webgl === true && <Experience active={visible} />}
-        {webgl === false && <Fallback />}
-      </div>
-
-      {webgl !== false && <Loader />}
-
-      {/* Copy */}
-      <div
-        className={`pointer-events-none absolute inset-x-0 top-0 z-10 px-5 pt-28 transition-all duration-1000 ease-[cubic-bezier(.22,1,.36,1)] sm:px-8 lg:inset-y-0 lg:left-[6vw] lg:right-auto lg:flex lg:w-[min(32rem,34vw)] lg:items-center lg:px-0 lg:pt-0 ${
-          explore ? "-translate-x-6 opacity-0" : "opacity-100"
-        }`}
-      >
-        <div className="fade-up max-w-xl">
-          <p className="flex items-center gap-3 text-[0.72rem] font-bold uppercase tracking-[0.32em] text-night/70">
-            <span className="h-px w-8 bg-volt" />
-            UGB Électricité
-          </p>
-          <h1 className="mt-5 text-[clamp(2.1rem,4.4vw,4.1rem)] font-semibold leading-[1.02] tracking-[-0.035em] text-night">
-            L’énergie de vos projets, <span className="serif-accent block text-[1.08em] text-night/85">la confiance en plus.</span>
-          </h1>
-          <p className="mt-5 hidden max-w-md text-[0.98rem] leading-relaxed text-mute sm:block">
-            Installation, rénovation et mise en conformité électrique pour maisons et bâtiments exigeants. Une exécution précise, du tableau
-            jusqu’au dernier luminaire.
-          </p>
-          <div className={`mt-7 flex flex-wrap gap-3 ${explore ? "" : "pointer-events-auto"}`}>
-            <a href="#prestations" className="btn btn-primary">
-              Découvrir notre savoir-faire <IconArrow size={17} className="btn-arrow" />
-            </a>
-            <button onClick={startExplore} className="btn btn-ghost">
-              <IconCube size={17} /> Explorer l’installation 3D
-            </button>
-          </div>
+    <section ref={section} id="accueil" className="relative w-full bg-ivory">
+      {/* Pinned stage: stays on screen while the scroll drives the sequence */}
+      <div ref={stage} className="relative h-[100svh] min-h-[600px] w-full overflow-hidden bg-ivory">
+        <div className="absolute inset-0">
+          {webgl === true && <Experience active={visible} />}
+          {webgl === false && <Fallback />}
         </div>
-      </div>
 
-      {webgl === true && (
-        <>
-          <PhaseRail />
-          <Legend />
-          <FinalMessage />
-          <InfoCard />
-          <Hint />
-          <Dock />
-        </>
-      )}
+        {webgl !== false && <Loader />}
+        <Copy isStatic={isStatic || webgl === false} />
+
+        {webgl === true && (
+          <>
+            {!isStatic && <PhaseRail />}
+            {!isStatic && <ScrollHint />}
+            <InfoPanel />
+            <Dock isStatic={isStatic} />
+          </>
+        )}
+      </div>
     </section>
   );
 }

@@ -19,7 +19,7 @@ const MOD = 0.04; // module width (scaled for legibility)
 /** Residential distribution board: enclosure, DIN rails, RCDs and breakers. */
 export function Panel() {
   const M = mats();
-  const label = useUI((s) => s.panelLabel);
+  const label = useUI((s) => s.step === 2 && s.mode === "timeline");
   const halo = useRef<THREE.Mesh>(null);
   const haloMat = useMemo(
     () =>
@@ -68,7 +68,7 @@ export function Panel() {
         <planeGeometry args={[2.2, 2.2]} />
       </mesh>
 
-      <group {...interactive("device", "panel", 6)}>
+      <group {...interactive("device", "panel")}>
         {/* enclosure */}
         <mesh material={M.lacquer} castShadow receiveShadow>
           <boxGeometry args={[W, HGT, D]} />

@@ -3,7 +3,7 @@
 import { useFrame } from "@react-three/fiber";
 import { useMemo, useRef } from "react";
 import * as THREE from "three";
-import { A } from "@/lib/anim";
+import { A, K, switchIsOn } from "@/lib/anim";
 import { useUI } from "@/lib/store";
 import { CIRCUIT_COLORS, DEVICES, H, type Device } from "./data";
 import { interactive } from "./interaction";
@@ -20,7 +20,20 @@ const smooth = (a: number, b: number, x: number) => {
 };
 
 /** Billboard glow that makes small devices readable from far away. */
-export function Halo({ color, size, strength, id }: { color: string; size: number; strength: () => number; id: string }) {
+const HIT = new THREE.MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false, colorWrite: false });
+
+/** Invisible, generous pick area so small devices are easy to click or tap. */
+function Hit({ r = 0.3, y = 0 }: { r?: number; y?: number }) {
+  return (
+    <mesh material={HIT} position={[0, y, 0]}>
+      <sphereGeometry args={[r, 10, 8]} />
+    </mesh>
+  );
+}
+
+type HaloProps = { color: string; size: number; strength: () => number; id: string; focusMin?: number };
+
+export function Halo({ color, size, strength, id, focusMin = 1 }: HaloProps) {
   // Indoor halos are seen through walls only once the house is open.
   const inside = INSIDE.has(id);
   const ref = useRef<THREE.Sprite>(null);
@@ -42,7 +55,7 @@ export function Halo({ color, size, strength, id }: { color: string; size: numbe
     const ui = useUI.getState();
     const focus = ui.hovered === id || (ui.selected?.kind === "device" && ui.selected.id === id);
     const pulse = 0.85 + 0.15 * Math.sin(s.clock.elapsedTime * 3 + size * 10);
-    const k = Math.max(strength(), focus ? 1 : 0);
+    const k = Math.max(strength(), focus ? focusMin : 0);
     mat.opacity = k * pulse * (focus ? 1 : 0.75);
     const sc = size * (focus ? 1.5 : 1) * (0.6 + 0.4 * k);
     ref.current.scale.set(sc, sc, sc);
@@ -55,29 +68,38 @@ export function Halo({ color, size, strength, id }: { color: string; size: numbe
 function Outlet({ d }: { d: Device }) {
   const M = mats();
   return (
-    <group position={d.pos} rotation={[0, FACING[d.facing ?? "+z"], 0]} {...interactive("device", d.id, 7)}>
+    <group position={d.pos} rotation={[0, FACING[d.facing ?? "+z"], 0]} {...interactive("device", d.id)}>
       <mesh material={M.deviceWhite} position={[0, 0, 0.006]} castShadow>
         <boxGeometry args={[0.085, 0.085, 0.012]} />
       </mesh>
       <mesh material={M.deviceGrey} position={[0, 0, 0.013]} rotation={[Math.PI / 2, 0, 0]}>
         <cylinderGeometry args={[0.027, 0.027, 0.004, 20]} />
       </mesh>
-      <Halo id={d.id} color={CIRCUIT_COLORS.outlet} size={0.75} strength={() => A.devices} />
+      <Hit r={0.28} />
+      <Halo id={d.id} color={CIRCUIT_COLORS.outlet} size={0.75} strength={() => A.devices * K.outlet} />
     </group>
   );
 }
 
 function Switch({ d }: { d: Device }) {
   const M = mats();
+  const rocker = useRef<THREE.Mesh>(null);
+  // The rocker tilts with the state of the luminaires it commands.
+  useFrame((_, dt) => {
+    if (!rocker.current) return;
+    const target = switchIsOn(d.id, useUI.getState().off) ? -0.28 : 0.28;
+    rocker.current.rotation.x += (target - rocker.current.rotation.x) * Math.min(1, dt * 14);
+  });
   return (
-    <group position={d.pos} rotation={[0, FACING[d.facing ?? "+z"], 0]} {...interactive("device", d.id, 7)}>
+    <group position={d.pos} rotation={[0, FACING[d.facing ?? "+z"], 0]} {...interactive("device", d.id)}>
       <mesh material={M.deviceWhite} position={[0, 0, 0.006]} castShadow>
         <boxGeometry args={[0.085, 0.085, 0.012]} />
       </mesh>
-      <mesh material={M.deviceGrey} position={[0, 0, 0.014]}>
-        <boxGeometry args={[0.05, 0.05, 0.006]} />
+      <mesh ref={rocker} material={M.deviceGrey} position={[0, 0, 0.014]}>
+        <boxGeometry args={[0.05, 0.05, 0.008]} />
       </mesh>
-      <Halo id={d.id} color={CIRCUIT_COLORS.light} size={0.75} strength={() => A.devices} />
+      <Hit r={0.28} />
+      <Halo id={d.id} color={CIRCUIT_COLORS.light} size={0.75} strength={() => A.devices * K.light} />
     </group>
   );
 }
@@ -89,14 +111,18 @@ function Luminaire({ d }: { d: Device }) {
     [],
   );
   const order = d.order ?? 0;
-  const level = () => smooth(order, order + 0.14, A.lights);
-  useFrame(() => {
+  // 1 = on, 0 = switched off by the visitor (eased for a soft fade)
+  const on = useRef(1);
+  const level = () => smooth(order, order + 0.14, A.lights) * on.current;
+  useFrame((_, dt) => {
+    const target = useUI.getState().off[d.id] ? 0 : 1;
+    on.current += (target - on.current) * Math.min(1, dt * 9);
     emissive.emissiveIntensity = level() * 7;
   });
 
   const [x, y, z] = d.pos;
   const ceil = d.level === "upper" ? H.upperCeil : H.groundCeil;
-  const h = interactive("device", d.id, 8);
+  const h = interactive("device", d.id);
 
   switch (d.style) {
     case "spot":
@@ -109,7 +135,8 @@ function Luminaire({ d }: { d: Device }) {
           <mesh material={emissive} position={[0, -0.019, 0]}>
             <cylinderGeometry args={[0.05, 0.05, 0.004, 24]} />
           </mesh>
-          <Halo id={d.id} color="#FFD27A" size={1.1} strength={level} />
+          <Hit r={0.3} />
+          <Halo id={d.id} color="#FFD27A" size={1.1} strength={level} focusMin={0.3} />
         </group>
       );
     case "disc":
@@ -121,7 +148,8 @@ function Luminaire({ d }: { d: Device }) {
           <mesh material={emissive} position={[0, -0.027, 0]}>
             <cylinderGeometry args={[0.27, 0.27, 0.006, 40]} />
           </mesh>
-          <Halo id={d.id} color="#FFD27A" size={1.8} strength={level} />
+          <Hit r={0.42} />
+          <Halo id={d.id} color="#FFD27A" size={1.8} strength={level} focusMin={0.3} />
         </group>
       );
     case "pendant": {
@@ -140,7 +168,8 @@ function Luminaire({ d }: { d: Device }) {
           <mesh material={emissive} position={[0, -0.04, 0]}>
             <sphereGeometry args={[0.06, 20, 12]} />
           </mesh>
-          <Halo id={d.id} color="#FFD27A" size={1.2} strength={level} />
+          <Hit r={0.32} />
+          <Halo id={d.id} color="#FFD27A" size={1.2} strength={level} focusMin={0.3} />
         </group>
       );
     }
@@ -159,7 +188,8 @@ function Luminaire({ d }: { d: Device }) {
           <mesh material={emissive} position={[0, -0.027, 0]}>
             <boxGeometry args={[1.62, 0.006, 0.04]} />
           </mesh>
-          <Halo id={d.id} color="#FFD27A" size={1.6} strength={level} />
+          <Hit r={0.5} />
+          <Halo id={d.id} color="#FFD27A" size={1.6} strength={level} focusMin={0.3} />
         </group>
       );
     }
@@ -172,7 +202,10 @@ function Luminaire({ d }: { d: Device }) {
           <mesh material={emissive} position={[0, 0.6, 0]}>
             <cylinderGeometry args={[0.072, 0.072, 0.08, 24]} />
           </mesh>
-          <Halo id={d.id} color="#FFD27A" size={1.3} strength={level} />
+          <Hit r={0.42} y={0.4} />
+          <group position={[0, 0.6, 0]}>
+            <Halo id={d.id} color="#FFD27A" size={1.3} strength={level} focusMin={0.3} />
+          </group>
         </group>
       );
     default:
@@ -182,8 +215,8 @@ function Luminaire({ d }: { d: Device }) {
 
 function Special({ d }: { d: Device }) {
   const M = mats();
-  const h = interactive("device", d.id, d.level === "outside" ? 10 : 7);
-  const halo = <Halo id={d.id} color={CIRCUIT_COLORS.special} size={1.1} strength={() => A.devices} />;
+  const h = interactive("device", d.id);
+  const halo = <Halo id={d.id} color={CIRCUIT_COLORS.special} size={1.1} strength={() => A.devices * K.special} />;
   const led = useMemo(
     () => new THREE.MeshStandardMaterial({ color: "#222", emissive: CIRCUIT_COLORS.special, emissiveIntensity: 0 }),
     [],

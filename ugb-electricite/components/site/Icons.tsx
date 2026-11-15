@@ -155,3 +155,37 @@ export const IconHand = (p: P) => (
     <path d="M8 13V5.5a1.5 1.5 0 0 1 3 0V11M11 10V4.5a1.5 1.5 0 0 1 3 0V11M14 10.5V6a1.5 1.5 0 0 1 3 0v7a8 8 0 0 1-8 8h-.4a6 6 0 0 1-4.6-2.2L2.5 16a1.6 1.6 0 0 1 2.4-2l2.1 1.8" />
   </svg>
 );
+export const IconRotateLeft = (p: P) => (
+  <svg {...base(p)}>
+    <path d="M4 12a8 8 0 1 0 2.6-5.9" />
+    <path d="M4 4v4.5h4.5" />
+  </svg>
+);
+export const IconRotateRight = (p: P) => (
+  <svg {...base(p)}>
+    <path d="M20 12a8 8 0 1 1-2.6-5.9" />
+    <path d="M20 4v4.5h-4.5" />
+  </svg>
+);
+export const IconPlus = (p: P) => (
+  <svg {...base(p)}>
+    <path d="M12 5v14M5 12h14" />
+  </svg>
+);
+export const IconMinus = (p: P) => (
+  <svg {...base(p)}>
+    <path d="M5 12h14" />
+  </svg>
+);
+export const IconPower = (p: P) => (
+  <svg {...base(p)}>
+    <path d="M12 3v9" />
+    <path d="M6.3 6.8a8 8 0 1 0 11.4 0" />
+  </svg>
+);
+export const IconEyeOff = (p: P) => (
+  <svg {...base(p)}>
+    <path d="M3 3l18 18M10.6 6.2A9.5 9.5 0 0 1 12 6c5 0 8.5 4 9.5 6a13 13 0 0 1-2.7 3.4M6.5 7.6A13 13 0 0 0 2.5 12c1 2 4.5 6 9.5 6 1.3 0 2.5-.3 3.6-.7" />
+    <path d="M9.9 10a3 3 0 0 0 4.1 4.1" />
+  </svg>
+);

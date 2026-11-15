@@ -16,21 +16,32 @@ npm run dev        # http://localhost:3000
 npm run build && npm start
 ```
 
-## Expérience 3D
+## Expérience 3D pilotée par le scroll
 
-La timeline (`lib/anim.ts`) démarre automatiquement :
+La maison reste épinglée à l’écran et **le défilement de la page pilote toute l’animation** (GSAP ScrollTrigger, `scrub` + `pin`). Rien n’avance tout seul : si le visiteur s’arrête, la scène s’arrête ; s’il remonte, tout se rejoue à l’envers.
 
-| Temps | Phase |
-| --- | --- |
-| 0 – 3 s | Maison complète, travelling caméra |
-| 3 – 7 s | Décomposition : la toiture se soulève, les façades s’écartent, l’étage monte, les cloisons deviennent transparentes |
-| 7 – 9 s | Le tableau électrique apparaît, avec un halo jaune et une étiquette |
-| 9 – 13 s | Les réseaux se dessinent en temps réel depuis le tableau (éclairage, prises, circuits spécialisés), avec des impulsions lumineuses qui les parcourent |
-| 13 – 16 s | Les luminaires s’allument un à un, rotation de la caméra et message final |
+Une timeline unique (`lib/anim.ts`), graduée de 0 à 100 % :
 
-Interactions : rotation, zoom et déplacement de la caméra ; « Ouvrir / Refermer la maison » ; « Afficher / Masquer les circuits » ; « Rejouer l’animation » ; clic sur une pièce ou un équipement (tableau, prises, interrupteurs, luminaires, circuits spécialisés), qui ouvre une fiche explicative et recentre la caméra.
+| Scroll | Chapitre | Ce qui se passe |
+| --- | --- | --- |
+| 0 – 15 % | Maison | Maison entièrement construite, léger mouvement de caméra |
+| 15 – 40 % | Décomposition | La toiture se soulève, les façades s’écartent, l’étage monte, les cloisons deviennent transparentes |
+| 40 – 55 % | Tableau électrique | Halo jaune, la caméra se rapproche du tableau |
+| 55 – 80 % | Circuits | Les circuits se tracent depuis le tableau (éclairage, prises, circuits spécialisés) |
+| 80 – 100 % | Exploration | Les luminaires s’allument, la caméra se pose sur la vue ouverte |
 
-Les circuits restent visibles à travers les murs grâce à une seconde passe « rayons X ». Ils sont colorés par type : jaune pour l’éclairage, bleu pour les prises, orange pour les circuits spécialisés.
+Après 100 %, un **palier d’exploration** garde la maison épinglée et ouverte :
+
+- glisser pour tourner (sur mobile : glissement horizontal ; le glissement vertical fait toujours défiler la page) ;
+- zoom avec les boutons +/−, un pincement, ou Ctrl + molette — la molette seule fait toujours défiler la page ;
+- clic sur un équipement : fiche d’information, zoom de caméra, **son circuit est mis en évidence et les autres atténués** ;
+- les luminaires s’allument et s’éteignent au clic, les interrupteurs commandent leurs luminaires, l’éclairage de la pièce suit ;
+- filtres de circuits (tous / éclairage / prises / spécialisés / masquer), réinitialisation de la caméra, ouverture/fermeture de la maison ;
+- Échap ou la croix ferme la fiche sans changer l’état de la scène.
+
+En remontant dans la page, les interactions se coupent et la timeline reprend la scène en douceur depuis la position où le visiteur a laissé la caméra.
+
+Le bouton « Explorer l’installation 3D » et « Rejouer » font simplement défiler la page jusqu’au palier : la séquence se joue alors d’elle-même.
 
 ### Structure
 
@@ -46,7 +57,8 @@ components/three/
   Landscape.tsx   jardin, piscine, terrasse, végétation
   Lighting.tsx    soleil + ombres, environnement studio, lumières intérieures
   Experience.tsx  Canvas, caméra cinématique, contrôles, post-traitement
-lib/anim.ts       timeline GSAP et actions (ouvrir, circuits, focus caméra)
+lib/anim.ts       timeline pilotée par le scroll, mode exploration et actions (sélection, filtres, caméra)
+lib/store.ts      état de l’interface (mode, chapitre, sélection, filtre, luminaires éteints)
 components/site/  navigation, hero, sections, formulaire de devis
 ```
 
@@ -66,8 +78,9 @@ La maison actuelle est modélisée en code. Pour passer à un modèle architectu
 - **Deux niveaux de qualité** : `high` (ombres 4096, AO, MSAA) et `low` (mobile ou CPU modeste, sans AO, résolution réduite). `PerformanceMonitor` bascule automatiquement en `low` si le framerate chute. On peut forcer un niveau avec `?q=high` ou `?q=low`.
 - Le rendu se met en pause quand le hero n’est plus visible.
 - **Sans WebGL**, une image statique (`public/renders/maison-ouverte.jpg`) remplace la scène.
-- `prefers-reduced-motion` : l’animation saute directement à l’état final.
-- Sur écran tactile, la scène ne capture les gestes qu’en mode « Explorer » : la page reste défilable.
+- `prefers-reduced-motion` : pas de séquence au scroll ; la maison est affichée ouverte, directement explorable.
+- La séquence est plus courte sur mobile (≈ 390 vh contre ≈ 510 vh sur ordinateur).
+- Les petits équipements ont une zone de clic invisible élargie, pour le tactile.
 
 ## À compléter avant la mise en ligne
 
