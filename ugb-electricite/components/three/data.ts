@@ -10,7 +10,7 @@
  */
 
 export type V3 = [number, number, number];
-export type Level = "ground" | "upper" | "outside";
+export type Level = "ground" | "upper" | "outside" | "roof";
 export type CircuitKind = "light" | "outlet" | "special";
 
 export const H = {
@@ -188,6 +188,8 @@ export const DEVICES: Device[] = [
   { id: "x-plaque", type: "special", room: "cuisine", level: "ground", title: "Plaque de cuisson — Circuit spécialisé", text: "Ligne dédiée en 6 mm² protégée par un disjoncteur 32 A : la puissance nécessaire, en toute sécurité.", specs: ["Circuit spécialisé 32 A", "Section 6 mm²", "Sortie de câble dédiée"], pos: [5.3, 0.93, -1.2] },
   { id: "x-four", type: "special", room: "cuisine", level: "ground", title: "Four encastré — Circuit spécialisé", text: "Le four dispose de son propre circuit, indépendant des prises du plan de travail.", specs: ["Circuit spécialisé 20 A", "Section 2,5 mm²", "Prise dédiée"], pos: [6.15, 1.1, -3.62], facing: "+z" },
   { id: "x-borne", type: "special", room: "exterieur", level: "outside", title: "Borne de recharge — Véhicule électrique", text: "Installation IRVE avec protection dédiée et pilotage de la charge pour ne jamais dépasser votre abonnement.", specs: ["Circuit dédié 7,4 kW", "Différentiel 30 mA type A / F", "Installateur qualifié IRVE"], pos: [-9.0, 0.9, 3.5], facing: "+x" },
+  { id: "x-pv", type: "special", room: "exterieur", level: "roof", title: "Panneaux photovoltaïques — Toiture", text: "Les panneaux solaires produisent une partie de l’électricité de la maison. Leur courant est converti par l’onduleur, puis injecté dans le tableau électrique.", specs: ["Raccordement via onduleur et protections dédiées", "Coupure d’urgence côté continu et alternatif", "Autoconsommation, avec ou sans revente du surplus"], pos: [2.2, 6.9, -2.0] },
+  { id: "x-onduleur", type: "special", room: "entree", level: "ground", title: "Onduleur photovoltaïque", text: "Il convertit le courant continu produit par les panneaux solaires en courant alternatif, puis l’injecte dans le tableau électrique.", specs: ["Circuit dédié protégé au tableau", "Interrupteur-sectionneur de proximité", "Suivi de la production en temps réel"], pos: [-6.3, 1.55, 1.27], facing: "+z" },
   { id: "x-pac", type: "special", room: "exterieur", level: "outside", title: "Pompe à chaleur — Circuit spécialisé", text: "Alimentation dimensionnée selon la puissance de l’unité extérieure, avec coupure de proximité.", specs: ["Circuit dédié", "Section selon puissance", "Coupure de proximité"], pos: [2.6, 0.3, -5.9] },
 
   // ---- Outside lights
@@ -315,6 +317,20 @@ export const CIRCUITS: Circuit[] = [
     level: "ground",
     start: 0,
     points: [[-5.85, 0.98, 1.33], [-5.85, -0.09, 1.33], [-6.9, -0.09, 1.33], [-6.9, -0.4, 1.33], [-9.0, -0.4, 1.33], [-9.0, -0.4, 3.5], [-9.0, 0.7, 3.5]],
+  },
+  {
+    id: "c-onduleur",
+    kind: "special",
+    level: "ground",
+    start: 0,
+    points: [[-5.9, 1.45, 1.33], [-6.06, 1.45, 1.33]],
+  },
+  {
+    id: "c-pv-descente",
+    kind: "special",
+    level: "ground",
+    start: 0.2,
+    points: [[-6.3, 1.82, 1.33], [-6.3, H.groundCeil, 1.33]],
   },
   {
     id: "c-pac",

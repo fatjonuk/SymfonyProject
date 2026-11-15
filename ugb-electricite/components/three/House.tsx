@@ -6,8 +6,8 @@ import * as THREE from "three";
 import { A, EXPLODE } from "@/lib/anim";
 import { useUI } from "@/lib/store";
 import { Circuits, RiserBridge } from "./Circuits";
-import { H, ROOMS, type Room } from "./data";
-import { Devices } from "./Devices";
+import { CIRCUIT_COLORS, H, ROOMS, type Room } from "./data";
+import { Devices, Halo } from "./Devices";
 import { GroundFurniture, UpperFurniture } from "./Furniture";
 import { floorGeometry, slabGeometry, type Opening } from "./geometry";
 import { interactive } from "./interaction";
@@ -179,7 +179,16 @@ function Roof() {
       <mesh material={M.concrete} position={[0.75, top + 0.01, -0.45]} receiveShadow>
         <boxGeometry args={[15.6, 0.02, 8.3]} />
       </mesh>
-      {/* photovoltaic array */}
+      {/* photovoltaic array — clickable as a whole */}
+      <group {...interactive("device", "x-pv", 16, pvFocus)}>
+        {/* invisible, slightly larger hit area so the thin panels are easy to tap */}
+        <mesh position={[2.2, top + 0.35, -2.0]}>
+          <boxGeometry args={[7.2, 0.7, 4.2]} />
+          <meshBasicMaterial transparent opacity={0} depthWrite={false} colorWrite={false} />
+        </mesh>
+        <group position={[2.2, top + 1.0, -2.0]}>
+          <Halo id="x-pv" color={CIRCUIT_COLORS.special} size={3.2} strength={() => A.devices * 0.55} />
+        </group>
       {pv.map(([x, z], i) => (
         <group key={i} position={[x, top + 0.32, z]} rotation={[-0.2, 0, 0]}>
           <mesh material={M.pv} castShadow>
@@ -190,9 +199,12 @@ function Roof() {
           </mesh>
         </group>
       ))}
+      </group>
     </group>
   );
 }
+
+const pvFocus = () => new THREE.Vector3(2.2, 6.9 + A.floor * EXPLODE.floorLift + A.roof * EXPLODE.roofLift, -2.0);
 
 export function House() {
   const upper = useRef<THREE.Group>(null);

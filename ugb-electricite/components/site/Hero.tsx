@@ -40,9 +40,14 @@ function hasWebGL() {
 }
 
 function focusDevice(d: Device) {
-  const lift = d.level === "upper" ? A.floor * EXPLODE.floorLift : 0;
+  const lift =
+    d.level === "upper"
+      ? A.floor * EXPLODE.floorLift
+      : d.level === "roof"
+        ? A.floor * EXPLODE.floorLift + A.roof * EXPLODE.roofLift
+        : 0;
   useUI.getState().set({ selected: { kind: "device", id: d.id } });
-  flyTo([d.pos[0], d.pos[1] + lift, d.pos[2]], d.type === "panel" ? 6 : 8);
+  flyTo([d.pos[0], d.pos[1] + lift, d.pos[2]], d.type === "panel" ? 6 : d.level === "roof" ? 16 : 8);
 }
 
 function focusRoom(id: string) {

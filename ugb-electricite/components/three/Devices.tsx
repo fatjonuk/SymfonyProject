@@ -20,7 +20,7 @@ const smooth = (a: number, b: number, x: number) => {
 };
 
 /** Billboard glow that makes small devices readable from far away. */
-function Halo({ color, size, strength, id }: { color: string; size: number; strength: () => number; id: string }) {
+export function Halo({ color, size, strength, id }: { color: string; size: number; strength: () => number; id: string }) {
   // Indoor halos are seen through walls only once the house is open.
   const inside = INSIDE.has(id);
   const ref = useRef<THREE.Sprite>(null);
@@ -261,6 +261,24 @@ function Special({ d }: { d: Device }) {
           <group position={[0, 0.6, 0]}>{halo}</group>
         </group>
       );
+    case "x-onduleur":
+      return (
+        <group position={d.pos} rotation={[0, FACING[d.facing ?? "+z"], 0]} {...h}>
+          <mesh material={M.deviceWhite} position={[0, 0, 0.07]} castShadow>
+            <boxGeometry args={[0.4, 0.52, 0.14]} />
+          </mesh>
+          <mesh material={M.screen} position={[0, 0.1, 0.142]}>
+            <boxGeometry args={[0.18, 0.08, 0.004]} />
+          </mesh>
+          <mesh material={led} position={[0, -0.04, 0.142]}>
+            <boxGeometry args={[0.1, 0.012, 0.004]} />
+          </mesh>
+          <mesh material={M.deviceGrey} position={[0.12, -0.17, 0.142]}>
+            <cylinderGeometry args={[0.03, 0.03, 0.004, 20]} />
+          </mesh>
+          {halo}
+        </group>
+      );
     case "x-seche":
       return (
         <group position={d.pos} rotation={[0, FACING[d.facing ?? "+x"], 0]} {...h}>
@@ -283,7 +301,9 @@ function Special({ d }: { d: Device }) {
 }
 
 export function Devices({ level }: { level: "ground" | "upper" }) {
-  const list = DEVICES.filter((d) => d.type !== "panel" && (level === "upper" ? d.level === "upper" : d.level !== "upper"));
+  const list = DEVICES.filter(
+    (d) => d.type !== "panel" && d.level !== "roof" && (level === "upper" ? d.level === "upper" : d.level !== "upper"),
+  );
   return (
     <group>
       {list.map((d) => {
