@@ -1,3 +1,6 @@
 
 # Impeccable engine binary (downloaded by the launcher)
 /.claude/skills/impeccable/scripts/bin/
+
+# Claude Code local settings (personal)
+/.claude/settings.local.json
