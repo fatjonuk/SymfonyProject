@@ -1,0 +1,194 @@
+body {
+  height: 0vh;
+  background: white;
+  font-family: 'ROBOTO', sans-serif;
+  letter-spacing: 1px;
+}
+
+.btn-orange {
+  background: #fc7a26;
+  color: #fff !important;
+  padding: 5px 15px !important;
+  font-size: small;
+}
+
+.pr0 {
+  padding-right: 0;
+}
+
+hr {
+  border-color: #e5e5e5;
+}
+
+.layout {
+  background: #fff;
+  width: auto;
+  margin: 0;
+}
+.layout .nav-head {
+  border-radius: 10px 10px 0 0;
+  background: #23408e;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.layout .nav-head ul {
+  padding-left: 0;
+  margin-bottom: 0;
+  display: flex;
+  align-items: center;
+}
+.layout .nav-head ul li {
+  list-style: none;
+  border-right: 1px solid #434a78;
+}
+.layout .nav-head ul li a {
+  display: block;
+  color: #969cb6;
+  padding: 20px 30px;
+  font-weight: bold;
+}
+.layout .nav-head ul li a:hover, .layout .nav-head ul li a:focus {
+  text-decoration: none;
+}
+.layout .nav-head ul li a i.fa-bars {
+  padding-right: 15px;
+  color: #fd7d31;
+}
+.layout .nav-head ul li a span {
+  color: #fff;
+}
+.layout .nav-head ul li a span:nth-child(3) {
+  color: #fd7d31;
+  margin-left: -4px;
+}
+.layout .nav-head ul li .btn {
+  margin-left: 25px;
+}
+.layout .db .left, .layout .db .mid, .layout .db .right {
+  height: 85vh;
+}
+.layout .db .left {
+  border-right: 1px solid #ddd;
+  border-radius: 0 0 0 10px;
+}
+.layout .db .left ul {
+  padding-left: 0;
+}
+.layout .db .left ul li {
+  list-style: none;
+  border-left: 3px solid #fff;
+}
+.layout .db .left ul li:first-child a {
+  margin-top: 15px;
+}
+.layout .db .left ul li:last-child a {
+  position: absolute;
+  bottom: 15px;
+}
+.layout .db .left ul li a {
+  display: block;
+  padding: 15px 15px 15px 25px;
+  color: #7b82a1;
+  font-weight: bold;
+}
+.layout .db .left ul li a:hover, .layout .db .left ul li a:focus {
+  text-decoration: none;
+}
+.layout .db .left ul li a i.fa {
+  padding-right: 15px;
+}
+.layout .db .left ul li:hover {
+  border-left: 3px solid #fd7d31;
+}
+.layout .db .left ul li:hover a i.fa {
+  color: #fd7d31;
+}
+.layout .db .left ul li.active {
+  border-left: 3px solid #fd7d31;
+}
+.layout .db .left ul li.active a {
+  color: #fd7d31 !important;
+}
+.layout .db .left ul li.active a i.fa {
+  color: #fd7d31 !important;
+}
+.layout .db .mid {
+  color: #182658;
+}
+.layout .db .mid .header-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 50px;
+  margin-top: 20px;
+}
+.layout .db .mid .header-info h2 {
+  font-weight: bold;
+}
+.layout .db .mid .header-info select {
+  font-weight: bold;
+  color: #182658;
+}
+.layout .db .mid .count {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  font-weight: bold;
+}
+.layout .db .mid .count h2 {
+  margin: 0;
+  font-weight: bold;
+}
+.layout .db .mid .chart {
+  margin-top: 50px;
+}
+.layout .db .mid .chart p {
+  font-size: 8px;
+  color: #b1b5c7;
+  font-weight: bold;
+}
+.layout .db .right {
+  color: #182658;
+  padding-right: 15px;
+}
+.layout .db .right .header-info {
+  margin-bottom: 50px;
+  margin-top: 50px;
+}
+.layout .db .right .header-info h4 {
+  font-weight: bold;
+  margin-top: 30px;
+  margin-bottom: 15px;
+}
+.layout .db .right ul.activity {
+  padding-left: 0;
+}
+.layout .db .right ul.activity li {
+  list-style: none;
+  border-left: 3px solid #fed0b1;
+  padding: 10px;
+  margin-top: 15px;
+}
+.layout .db .right ul.activity li h5 {
+  font-weight: bold;
+}
+.layout .db .right ul.activity li h5 small {
+  float: right;
+  color: #a3aab8;
+  margin-top: 5px;
+}
+.layout .db .right ul.activity li p {
+  color: #a3aab8;
+  padding-top: 8px;
+  font-size: 13px;
+}
+.layout .db .right .by {
+  position: absolute;
+  bottom: 15px;
+  right: 30px;
+  font-size: small;
+  color: #a3aab8;
+}
+

@@ -1,0 +1,70 @@
+{% extends "/base.html.twig" %}
+
+
+    {% block title %} SalleTpBundle {% endblock %}
+    {% block stylesheets %}
+        <meta content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0' name='viewport' />
+    <meta name="viewport" content="width=device-width" />
+
+
+    <!-- Modification de la page avec css     -->
+    <link href="{{ asset('bundles/salletp/assets/css/bootstrap.min.css') }}" rel="stylesheet" />
+
+    <!--  Fichier css pour les pages   -->
+    <link href="{{ asset('bundles/salletp/assets/css/light-bootstrap-dashboard.css?v=1.4.0') }}" rel="stylesheet"/>
+
+    <!--     Import des Icones      -->
+    <link href="http://maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
+    <link href='http://fonts.googleapis.com/css?family=Roboto:400,700,300' rel='stylesheet' type='text/css'>
+    <link href="{{ asset('bundles/salletp/assets/css/pe-icon-7-stroke.css') }}" rel="stylesheet" />
+    <style type="text/css">
+        select {
+
+    width: 100%;
+    border-radius: 9px;
+    height: 40px;
+    color: white;
+    background-color: #444;
+    font-weight: bold;
+    text-align: center;
+    margin-left: 0px;
+
+}
+    #form label{
+    display: block;
+    text-align: center;
+    font-size: 20px
+    }
+    </style>
+    {% endblock %}
+
+        {% block javascripts %}
+        {% endblock %}
+
+        {% block titre %} Dashboard {% endblock %}
+
+        {% block menuGauche %}
+        <ul class="nav"> 
+                <li >
+                    <a href="/a">
+                        <i class="pe-7s-home"></i> <!-- Icone du menu-->
+                        <p>Dashboard</p>
+                    </a>
+                </li>
+                <li class="active"> <!--Menu active a gauche en fonction de la page-->
+                    <a href="">
+                        <i class="pe-7s-graph"></i>
+                        <p>Dashboard</p>
+                    </a>
+                </li>
+                <li>
+                    <a href="">
+                        <i class="pe-7s-note2"></i>
+                        <p>Table List</p>
+                    </a>
+                </li>
+                </ul>{% endblock %}
+
+                {% block premierDiv %} 
+                {{ form(Selection) }}
+                {% endblock %}

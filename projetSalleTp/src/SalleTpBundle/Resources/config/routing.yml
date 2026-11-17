@@ -1,0 +1,37 @@
+salle_tp_homepage:
+    path:     /
+    defaults: { _controller: SalleTpBundle:Default:index2 }
+site_connectin:
+    path:     /connection
+    defaults: { _controller: SalleTpBundle:Connection:connection }
+site_stats:
+    path:     /stats/{id1}-{id2}
+    defaults: { _controller: SalleTpBundle:Stats:stats }
+site_NomTable_form:
+    path:     /NomTableForm
+    defaults: { _controller: SalleTpBundle:First:nomTableForm}
+site_NomColonne_form:
+    path:     /NomColonne-{nomTable1}
+    defaults: { _controller: SalleTpBundle:First:nomColonneForm}
+site_recherche:
+    path:     /recherche
+    defaults: { _controller: SalleTpBundle:RechercheForm:rechercheForm }
+site_infosNomtable:
+    path:     /info-{nomTable1}
+    defaults: { _controller: SalleTpBundle:Stats:infoNomtable }
+site_infos:
+    path:     /info-
+    defaults: { _controller: SalleTpBundle:First:info }
+site_infos2:
+    path:     /info2/{id}
+    defaults: { _controller: SalleTpBundle:Stats:info2 }
+site_infos3:
+    path:     /info3/{id1}-{id2}-{id3}-{nomTable1}
+    defaults: { _controller: SalleTpBundle:Stats:info3 }
+site_infos4:
+    path:     /info4/{type}/{donne1}/{donne2}
+    defaults: { _controller: SalleTpBundle:Stats:info4 }
+site_tableList:
+    path:     /tableList
+    defaults: { _controller: SalleTpBundle:TableList:tableList }
+

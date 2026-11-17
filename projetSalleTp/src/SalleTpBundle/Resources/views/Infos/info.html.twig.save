@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<link rel="stylesheet" href="{{ asset('bundles/salletp/css/style.css') }}" type="text/css" media="all" />
+ <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+ <link rel="stylesheet" href="hhttps://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+<head>
+
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+  <title>Menu Navigation</title>
+<style>
+@import url('https://fonts.googleapis.com/css?family=Montserrat:300,400,700,800,900');
+
+body { 
+  height: 100vh;
+  background: linear-gradient(to bottom, #3546ab, #1c286b) no-repeat;
+  font-family: 'Montserrat', sans-serif;
+  letter-spacing: 1px;
+  &:before {
+    content: '';
+    position: fixed;
+    bottom: -300px;
+    left: -300px;
+    z-index: -1;
+
+    width: 600px;
+    height: 600px;
+    background: linear-gradient(to bottom, #2b3d96, #293c92);
+    border-radius: 50%;
+  }
+  &:after {
+    content: '';
+    position: fixed;
+    top: -300px;
+    right: -300px;
+    z-index: -1;
+
+    width: 600px;
+    height: 600px;
+    background: linear-gradient(to bottom, #fc7a26, #fc7a26);
+    border-radius: 50%;
+  }
+}
+
+.btn-orange {
+  background: #fc7a26;
+  color: #fff !important;
+  padding: 5px 15px !important;
+  font-size: small;
+}
+.pr0 {padding-right: 0;}
+hr {border-color: #e5e5e5;}
+
+.layout {
+  background: #fff;
+  height: 100%;
+  margin: 50px 0;
+  border-radius: 10px;
+  .nav-head {
+    border-radius: 10px 10px 0 0;
+    background: #1a265b;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    ul {
+      padding-left: 0;
+      margin-bottom: 0;
+      display: flex;
+      align-items: center;
+      li {
+        list-style: none;
+        border-right: 1px solid #434a78;
+        a {
+          display: block;
+          color: #969cb6;
+          padding: 20px 30px;
+          font-weight: bold;
+          &:hover, &:focus {text-decoration: none;}
+          i.fa-bars {padding-right: 15px; color: #fd7d31;}
+          span {
+            color: #fff;
+            &:nth-child(3) {color: #fd7d31; margin-left: -4px;}
+          }
+        }
+        .btn {margin-left: 25px;}
+      }
+    }
+  }
+  .db {
+    .left, .mid, .right {height: 85vh;}
+    .left {
+      border-right: 1px solid #ddd;
+      border-radius: 0 0 0 10px;
+      ul{ padding-left: 0;
+        li {
+          list-style: none;
+          border-left: 3px solid #fff;
+          &:first-child a {
+            margin-top: 15px;
+          }
+          &:last-child a {
+            position: absolute;
+            bottom: 15px;
+          }
+          a {
+            display: block;
+            padding: 15px 15px 15px 25px;
+            color: #7b82a1;
+            font-weight: bold;
+            &:hover, &:focus {text-decoration: none;}
+            i.fa {padding-right: 15px;}
+          }
+          &:hover {border-left: 3px solid #fd7d31;}
+          &:hover a i.fa {color: #fd7d31;}
+        }
+        li.active {
+          border-left: 3px solid #fd7d31;
+          a { color: #fd7d31 !important;
+            i.fa {color: #fd7d31 !important;}
+          }
+        }
+      }
+    }
+    .mid {
+      color: #182658;
+      .header-info {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        //border-bottom: 1px solid #e5e5e5;
+        margin-bottom: 50px;
+        margin-top: 20px;
+        h2 {font-weight: bold;}
+        select {font-weight: bold; color: #182658;}
+      }
+      .count {
+        display: flex;
+        align-items: center;
+        justify-content: space-around;
+
+        font-weight: bold;
+        h2 {margin: 0; font-weight: bold;}
+      }
+      .chart {margin-top: 50px;
+        p {font-size: 8px; color: #b1b5c7; font-weight: bold;}
+      }
+    }
+    .right { color: #182658; padding-right: 15px;
+      .header-info {
+        // border-bottom: 1px solid #e5e5e5;
+        margin-bottom: 50px;
+        margin-top: 50px;
+        h4 {font-weight: bold; margin-top: 30px; margin-bottom: 15px;}
+      }
+      ul.activity {
+        padding-left: 0;
+        li {list-style: none; border-left: 3px solid #fed0b1; padding: 10px; margin-top: 15px;
+          h5 {font-weight: bold;
+            small {
+              float: right;
+              color: #a3aab8;
+              margin-top: 5px;
+            }
+          }
+          p {color: #a3aab8; padding-top: 8px; font-size: 13px;}
+        }
+      }
+      .by {
+        position: absolute;
+        bottom: 15px;
+        right: 30px;
+        font-size: small;
+        color: #a3aab8;
+
+      }
+    }
+  }
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+  <div class="row layout">
+    <div class="nav-head">
+      <ul class="">
+        <li>
+          <a href="#">
+            <i class="fa fa-bars fa-lg"></i><span>ContractPod</span><span>Ai</span>
+          </a>
+        </li>
+        <li>
+          <button class="btn btn-orange">New</button>
+        </li>
+      </ul>
+      <ul class="">
+        <li><a href="#"><i class="fa fa-search fa-lg"></i></a></li>
+        <li><a href="#"><i class="fa fa-bell fa-lg"></i></a></li>
+        <li><a href="#"><span class="">AG</span>Antoine Griezmann</a></li>
+      </ul>
+    </div>
+    <div class="row db">
+      <div class="col-sm-2 pr0">
+        <div class="left">
+          <ul>
+            <li class="active"><a href="#"><i class="fa fa-snowflake-o"></i> Dashboard</a></li>
+            <li><a href="#"><i class="fa fa-list-alt"></i> Contracts</a></li>
+            <li><a href="#"><i class="fa fa-bar-chart"></i> Reports</a></li>
+            <li><a href="#"><i class="fa fa-user"></i> Contacts</a></li>
+            <li><a href="#"><i class="fa fa-calendar"></i> Calendar</a></li>
+            <li><a href="#"><i class="fa fa-cog"></i> Settings</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="col-sm-7">
+        <div class="mid">
+          <div class="header-info">
+            <h2>Dashboard</h2>
+            <div>
+              <select class="form-control">
+                <option value="">17 Feb - 16 Mar</option>
+                <option value="">17 Mar - 16 Apr</option>
+              </select>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-sm-3">
+              <div class="count">
+                <h2>8</h2> <span class="small">Active<br>Contacts</span>
+              </div>
+            </div>
+            <div class="col-sm-3">
+              <div class="count">
+                <h2>4</h2> <span class="small">Awaiting<br>Signatures</span>
+              </div>
+            </div>
+            <div class="col-sm-3">
+              <div class="count">
+                <h2>3</h2> <span class="small">Priority<br>Contracts</span>
+              </div>
+            </div>
+            <div class="col-sm-3">
+              <div class="count">
+                <h2>1</h2> <span class="small">Approval<br>Requests</span>
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="chart">
+              <div class="col-sm-8">
+                <p>CUSTOMER/SUPPLIER ANALYSIS</p>
+                <img src="https://i.ibb.co/PM36RXJ/am-Charts-2.png" alt="" class="img-responsive">
+              </div>
+              <div class="col-sm-4">
+                <p>CONTRACT TYPE ANALYSIS</p>
+                <img src="https://i.ibb.co/v49r7HL/am-Charts-3.png" alt="" class="img-responsive">
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-sm-3">
+        <div class="right">
+          <div class="header-info">
+            <h4>Upcoming Activities</h4>
+          </div>
+          <ul class="activity">
+            <li>
+              <h5>Activityname <small class="">Today, 18:00</small></h5>
+              <p>Description goes here, it may be extremely long...</p>
+            </li>
+            <li>
+              <h5>Activityname <small class="">Today, 18:00</small></h5>
+              <p>Description goes here, it may be extremely long...</p>
+            </li>
+            <li>
+              <h5>Activityname <small class="">Today, 18:00</small></h5>
+              <p>Description goes here, it may be extremely long...</p>
+            </li>
+          </ul>
+          <p class="by">Inspired by <a href="https://bit.ly/2DkHVY5" target="_blank">Lay</a></p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+
+</html>

@@ -1,0 +1,45 @@
+body {
+  font-family: "Roboto", sans-serif;
+}
+
+.center {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center
+}
+
+.menu {
+  width: 600px;
+  display: flex;
+  background: #fff;
+  box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.4);
+  padding: 24px;
+  border-radius: 10px
+}
+
+.bouton-Menu {
+  position: relative;
+  flex: 1 1 16.66%;
+  padding: 0 10px;
+  font-size: 17px;
+  text-align: center
+}
+
+.bouton-Menu:not(:last-child) {
+  border-right: 2px solid #f5f5f5
+}
+
+.bouton-Menu:hover {
+  cursor: pointer;
+  opacity: 0.5;
+  border-color: #23408e
+}
+.menu-icon {
+  color: #23408e
+}
+
+.menu-text {
+  margin: 4px 0 0 0;
+  font-weight: 600
+}

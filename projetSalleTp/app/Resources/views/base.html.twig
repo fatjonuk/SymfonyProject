@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="fr">
+    <head>
+        <meta charset="UTF-8" />
+        <title>{% block title %}{% endblock %}</title>
+        {% block stylesheets %}{% endblock %}
+    </head>
+    <body>
+        {% block javascripts %}{% endblock %}
+<div class="div-principal">
+    <div class="Barre-gauche" couleur-barreDeGauche="blue" imageArrierePlan-barreDeGauche="">
+
+    <!--
+
+        Possibilité d'ajouter image en arrier plan de la barre de gauche en ajoutant l'url de l'image dans imageArrierePlan-barreDeGauche=""
+
+    -->
+
+      <div class="Barre-gauche-div-principal">
+            <div class="logo">
+                <a href="" class="simple-text">
+                    <!-- titre a gauche en haut -->
+                    {% block titre %}{% endblock %}
+                </a>
+            </div>
+            <!-- Menu de gauche -->
+            {% block menuGauche %}{% endblock %}
+            <!-- <ul class="nav"> 
+                <li >
+                    <a href="/info4">
+                        <i class="pe-7s-home"></i> < !-- Icone du menu- ->
+                        <p>Dashboard</p>
+                    </a>
+                </li>
+                <li class="active"> < !--Menu active a gauche en fonction de la page- ->
+                    <a href="">
+                        <i class="pe-7s-graph"></i>
+                        <p>Dashboard</p>
+                    </a>
+                </li>
+                <li>
+                    <a href="">
+                        <i class="pe-7s-note2"></i>
+                        <p>Table List</p>
+                    </a>
+                </li>
+                </ul>
+            -->
+      </div>
+    </div>
+    <!-- Fin code barre de gauche -->
+
+    <div class="pannel-haut">
+        <nav class="navbar barre-navigation_defaut barre-navigation_fixe">
+            <div class="container-fluid">
+                <div class="collapse navbar-collapse">
+                    <ul class="nav navbar-nav navbar-left">
+                        <li>
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                                <i class="fa fa-dashboard"></i>
+                <p class="hidden-lg hidden-md">Dashboard</p>
+                            </a>
+                        </li>
+                        <li class="dropdown">
+                              <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                                    <i class="fa fa-globe"></i>
+                                    <b class="caret hidden-lg hidden-md"></b>
+                  <p class="hidden-lg hidden-md">
+                    5 Notifications
+                    <b class="caret"></b>
+                  </p>
+                              </a>
+                              <ul class="dropdown-menu">
+                                <li><a href="#">Notification 1</a></li>
+                                <li><a href="#">Notification 2</a></li>
+                                <li><a href="#">Notification 3</a></li>
+                                <li><a href="#">Notification 4</a></li>
+                                <li><a href="#">Another notification</a></li>
+                              </ul>
+                        </li>
+                        <li>
+                           <a href="">
+                                <i class="fa fa-search"></i>
+                <p class="hidden-lg hidden-md">Search</p>
+                            </a>
+                        </li>
+                    </ul>
+
+                    <ul class="nav navbar-nav navbar-right">
+                        <li>
+                           <a href="">
+                               <p>Account</p>
+                            </a>
+                        </li>
+                        <li class="dropdown">
+                              <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                                    <p>
+                    Dropdown
+                    <b class="caret"></b>
+                  </p>
+
+                              </a>
+                              <ul class="dropdown-menu">
+                                <li><a href="#">Action</a></li>
+                                <li><a href="#">Another action</a></li>
+                                <li><a href="#">Something</a></li>
+                                <li><a href="#">Another action</a></li>
+                                <li><a href="#">Something</a></li>
+                                <li class="divider"></li>
+                                <li><a href="#">Separated link</a></li>
+                              </ul>
+                        </li>
+                        <li>
+                            <a href="#">
+                                <p>Log out</p>
+                            </a>
+                        </li>
+            <li class="separator hidden-lg"></li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+
+        <!--Contenu Principal -->
+        <div class="content">
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-md-4" style="min-width: 65%; height: 500px; margin-top: 20px;">
+                        <div class="card">
+
+                            <div class="header" >
+                               
+                            </div>
+                            <div class="content" style="">
+                                {% block premierDiv %}{% endblock %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-8" style="width: 35%; height: 300px; margin-top: 20px;">
+                        <div class="card">
+                            <div class="header">
+                            </div>
+                            <div class="content">
+                                {% block deuximemDiv %}{% endblock %}          
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+
+                <div class="row">
+                    <div class="col-md-6" style="width:40%;margin-top: -110px;">
+                        <div class="card ">
+                            <div class="header">
+                              
+                            </div>
+                            <div class="content">
+                               {% block troisiemeDiv %}{% endblock %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-7" style="width:60%;margin-top: -110px;">
+                        <div class="card ">
+                            <div class="header">
+                               
+                            </div>
+                            <div class="content">
+                                {% block quatreDiv %}{% endblock %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+
+</body>
+
+</html>

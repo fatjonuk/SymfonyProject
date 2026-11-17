@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+  <style>
+
+body {
+  font-family: "Roboto", sans-serif;
+}
+
+.center {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+}
+
+.menu {
+  width: 600px;
+  display: flex;
+  background: #fff;
+  box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.4);
+  padding: 24px;
+  border-radius: 10px;
+  margin-left: 200px;
+}
+
+.bouton-Menu {
+  position: relative;
+  flex: 1 1 16.66%;
+  padding: 0 10px;
+  font-size: 17px;
+  text-align: center
+}
+
+.bouton-Menu:not(:last-child) {
+  border-right: 2px solid #f5f5f5
+}
+
+.bouton-Menu:hover {
+  cursor: pointer;
+  opacity: 0.5;
+  border-color: #23408e
+}
+.menu-icon {
+  color: #23408e
+}
+
+.menu-text {
+  margin: 4px 0 0 0;
+  font-weight: 600
+}
+a{
+    text-decoration: none;
+    color: black;
+  }
+</style>
+
+<head>
+
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+  <title>Menu Navigation</title>
+
+  <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+
+    <script type="text/javascript">
+
+      google.charts.load('current', {'packages':['corechart']});
+      google.charts.setOnLoadCallback(drawVisualization);
+
+      function drawVisualization() {
+        // Some raw data (not necessarily accurate)
+        var data = google.visualization.arrayToDataTable([
+          ['Mois', 'IRM', 'SCANNER'],
+          ['{{ mois1.Mois }}',{{ mois1.IRM }},{{ mois1.Scanner }}],
+          ['{{ mois2.Mois }}',{{ mois2.IRM }},{{ mois2.Scanner }}]
+        ]);
+
+        var options = {
+          title : 'Nombre d\'examens',
+          vAxis: {title: 'Cups'},
+          hAxis: {title: 'Mois'},
+          seriesType: 'bars',
+          series: {5: {type: 'line'}}
+        };
+
+        var chart = new google.visualization.ComboChart(document.getElementById('chart_div'));
+        chart.draw(data, options);
+      }
+    </script>
+
+
+</head>
+
+<body>
+
+  <div class="center">
+
+    <div class="menu">
+	<a href="/a">
+      <div class="bouton-Menu">
+        <div class="menu-icon">
+          <i class="fas fa-hotel"></i>
+        </div>
+        <p class="menu-text">Accueil</p>
+      </div>
+  	</a>
+
+
+      <div class="bouton-Menu">
+        <div class="menu-icon">
+          <i class="fas fa-chart-area"></i>
+        </div>
+        <p class="menu-text">Stats</p>
+      </div>
+
+      <a href="/connection">
+      <div class="bouton-Menu">
+        <div class="menu-icon">
+          <i class="fas fa-user-tie"></i>
+        </div>
+        <p class="menu-text">Connexion</p>
+      </div>
+    </a>
+
+    </div>
+  </div>
+
+  <div id="chart_div" style="width: 540px; height: 300px; margin-top: 20px;"></div>
+
+</body>
+
+  <script defer src="https://use.fontawesome.com/releases/v5.8.1/js/all.js"
+    integrity="sha384-g5uSoOSBd7KkhAMlnQILrecXvzst9TdC09/VM+pjDTCM+1il8RHz5fKANTFFb+gQ" crossorigin="anonymous">
+  </script>
+
+</html>

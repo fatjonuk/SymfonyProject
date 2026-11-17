@@ -1,0 +1,237 @@
+{% extends "/base.html.twig" %}
+
+
+    {% block title %} SalleTpBundle {% endblock %}
+    {% block stylesheets %}
+        <meta content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0' name='viewport' />
+    <meta name="viewport" content="width=device-width" />
+
+
+    <!-- Modification de la page avec css     -->
+    <link href="{{ asset('bundles/salletp/assets/css/bootstrap.min.css') }}" rel="stylesheet" />
+
+    <!--  Fichier css pour les pages   -->
+    <link href="{{ asset('bundles/salletp/assets/css/light-bootstrap-dashboard.css?v=1.4.0') }}" rel="stylesheet"/>
+
+    <!--     Import des Icones      -->
+    <link href="http://maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
+    <link href='http://fonts.googleapis.com/css?family=Roboto:400,700,300' rel='stylesheet' type='text/css'>
+    <link href="{{ asset('bundles/salletp/assets/css/pe-icon-7-stroke.css') }}" rel="stylesheet" />
+    <style type="text/css">
+        #form_Nom_de_la_table_des_donnees {
+
+    width: 150px;
+    border-radius: 9px;
+    height: 40px;
+    color: white;
+    background-color: #444;
+    font-weight: bold;
+    text-align: center;
+    margin-left: 14px;
+
+}
+    </style>
+    {% endblock %}
+
+        {% block javascripts %}
+                <script src="{{ asset('bundles/salletp/legacy-assets/canvasjs.min.js') }}"></script>
+        <script>
+            $(function () {
+                var totalRevenue = 15341110;
+                
+                // CanvasJS column chart to show revenue from Jan 2015 - Dec 2015
+                var revenueColumnChart = new CanvasJS.Chart("revenue-column-chart", {
+                    animationEnabled: true,
+                    backgroundColor: "transparent",
+                    zoomEnabled: true,
+                    exportEnabled: true,
+                    theme: "theme2",
+                    axisX: {
+                        labelFontSize: 14,
+                        valueFormatString: "MMM YYYY"
+                    },
+                    axisY: {
+                        labelFontSize: 14,
+                        prefix: "$"
+                    },
+                    toolTip: {
+                        borderThickness: 0,
+                        cornerRadius: 0
+                    },
+                    data: [
+                        {
+                            type: "column",
+                            yValueFormatString: "$###,###.##",
+                            dataPoints: [
+                                { x: new Date("1 Jan 2015"), y: 868800 },
+                                { x: new Date("1 Feb 2015"), y: 1071550 },
+                                { x: new Date("1 Mar 2015"), y: 1286200 },
+                                { x: new Date("1 Apr 2015"), y: 1106900 },
+                                { x: new Date("1 May 2015"), y: 1033800 },
+                                { x: new Date("1 Jun 2015"), y: 1017160 },
+                                { x: new Date("1 Jul 2015"), y: 1458000 },
+                                { x: new Date("1 Aug 2015"), y: 1165850 },
+                                { x: new Date("1 Sep 2015"), y: 1594150 },
+                                { x: new Date("1 Oct 2015"), y: 1501700 },
+                                { x: new Date("1 Nov 2015"), y: 1588400 },
+                                { x: new Date("1 Dec 2015"), y: 1648600 }
+                            ]
+                        }
+                    ]
+                });
+                
+                revenueColumnChart.render();
+                
+                //CanvasJS pie chart to show product wise annual revenue for 2015
+                var productsRevenuePieChart = new CanvasJS.Chart("products-revenue-pie-chart", {
+                    animationEnabled: true,
+                    theme: "theme2",
+                    legend: {
+                        fontSize: 14
+                    },
+                    toolTip: {
+                        borderThickness: 0,
+                        content: "<span style='\"'color: {color};'\"'>{name}</span>: ${y} (#percent%)",
+                        cornerRadius: 0
+                    },
+                    data: [
+                        {       
+                            indexLabelFontColor: "#676464",
+                            indexLabelFontSize: 14,
+                            legendMarkerType: "square",
+                            legendText: "{indexLabel}",
+                            showInLegend: true,
+                            startAngle:  90,
+                            type: "pie",
+                            dataPoints: [
+                                {  y: 6289855, name:"Product A", indexLabel: "Product A - 41%", legendText: "Product A", exploded: true },
+                                {  y: 2761400, name:"Product B", indexLabel: "Product B - 18%", legendText: "Product B" },
+                                {  y: 3681866, name:"Product C", indexLabel: "Product C - 24%", legendText: "Product C", color: "#8064a1" },
+                                {  y: 2607989, name:"Product D", indexLabel: "Product D - 17%", legendText: "Product D" }
+                            ]
+                        }
+                    ]
+                });
+                
+                productsRevenuePieChart.render();
+                
+                //CanvasJS spline chart to show orders from Jan 2015 to Dec 2015
+                var ordersSplineChart = new CanvasJS.Chart("orders-spline-chart", {
+                    animationEnabled: true,
+                    backgroundColor: "transparent",
+                    theme: "theme2",
+                    toolTip: {
+                        borderThickness: 0,
+                        cornerRadius: 0
+                    },
+                    axisX: {
+                        labelFontSize: 14,
+                        maximum: new Date("31 Dec 2015"),
+                        valueFormatString: "MMM YYYY"
+                    },
+                    axisY: {
+                        gridThickness: 0,
+                        labelFontSize: 14,
+                        lineThickness: 2
+                    },
+                    data: [
+                        {
+                            type: "spline",
+                            dataPoints: [
+                                { x: new Date("1 Jan 2015"), y: 17376 },
+                                { x: new Date("1 Feb 2015"), y: 21431 },
+                                { x: new Date("1 Mar 2015"), y: 25724 },
+                                { x: new Date("1 Apr 2015"), y: 22138 },
+                                { x: new Date("1 May 2015"), y: 20676 },
+                                { x: new Date("1 Jun 2015"), y: 25429 },
+                                { x: new Date("1 Jul 2015"), y: 29160 },
+                                { x: new Date("1 Aug 2015"), y: 23317 },
+                                { x: new Date("1 Sep 2015"), y: 31883 },
+                                { x: new Date("1 Oct 2015"), y: 30034 },
+                                { x: new Date("1 Nov 2015"), y: 31768 },
+                                { x: new Date("1 Dec 2015"), y: 41215 }
+                            ]
+                        }
+                    ]
+                });
+
+                ordersSplineChart.render();
+                
+            });
+</script>
+<script>
+     var nb =0;
+     var moyenne = 0;
+    {% for nomTable1 in nomTable1 %}
+        nb = nb+1;
+        moyenne= moyenne +{{ attribute(nomTable1, id1) }};
+    {% endfor %}
+    moyenne = moyenne / nb;
+window.onload = function () {
+
+var chart = new CanvasJS.Chart("chartContainer", {
+    theme: "light2", // "light1", "light2", "dark1", "dark2"
+    animationEnabled: true,
+    exportEnabled: true,
+    zoomEnabled: true,
+    title: {
+        text: "Chiffre affaire"
+    },
+    axisY: {
+        title: "",
+                crosshair: {
+            enabled: true,
+        },
+        stripLines: [{
+            startValue: moyenne - (moyenne/10),
+            endValue:moyenne + (moyenne/10),
+            label: "Moyenne",
+            color:"#d8d8d8",
+        }]
+    },
+    data: [{
+        type: "area",
+        xValueFormatString: "DD/MMM/YYYY",
+        dataPoints: [{% for nomTable1 in nomTable1 %}
+        {x: new Date({{ attribute(nomTable1, id3)|date('Y,m,d') }}) ,y:{{ attribute(nomTable1, id1) }} },
+
+    {% endfor %}]
+    }]
+});
+
+
+chart.render();
+
+
+
+
+}
+</script>{% endblock %}
+
+        {% block titre %} Dashboard {% endblock %}
+
+        {% block menuGauche %}
+        <ul class="nav"> 
+                <li >
+                    <a href="/a">
+                        <i class="pe-7s-home"></i> <!-- Icone du menu-->
+                        <p>Dashboard</p>
+                    </a>
+                </li>
+                <li class="active"> <!--Menu active a gauche en fonction de la page-->
+                    <a href="">
+                        <i class="pe-7s-graph"></i>
+                        <p>Dashboard</p>
+                    </a>
+                </li>
+                <li>
+                    <a href="">
+                        <i class="pe-7s-note2"></i>
+                        <p>Table List</p>
+                    </a>
+                </li>
+                </ul>{% endblock %}
+
+                {% block premierDiv %}
+                    <div id="chartContainer" style="height: 300px; width: 100%;"></div>
+                {% endblock %}

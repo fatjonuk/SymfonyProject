@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<!-- import des fichiers css qui se trouvent dans le dossier /web */ -->
+<link rel="stylesheet" href="{{ asset('bundles/salletp/css/info.css') }}" type="text/css" media="all" />
+ <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"> 
+ <link rel="stylesheet" href="hhttps://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css"> 
+<style rel="stylesheet" >
+<head>
+
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+  <title>Menu Navigation</title>
+<style>
+@import url('https://fonts.googleapis.com/css?family=Montserrat:300,400,700,800,900');
+
+</style>
+
+
+
+</head>
+
+<body>
+
+<div >
+  <div class="row layout">
+    <div class="nav-head">
+      <ul class="">
+        <li>
+          <a href="/a">
+            <i class="fa fa-bars fa-lg"></i><span>Dash </span><span> Board</span>
+          </a>
+        </li>
+        <li>
+          <button class="btn btn-orange">New</button>
+        </li>
+      </ul>
+      <ul class="">
+        <li><a href="#"><i class="fa fa-search fa-lg"></i></a></li>
+        <li><a href="#"><i class="fa fa-bell fa-lg"></i></a></li>
+        <li><a href="#"><span class="">DB</span>Dashboard</a></li> 
+      </ul>
+    </div>
+    <div class="row db">
+      <div class="col-sm-2 pr0">
+        <div class="left">
+          <ul>
+            <li class="active"><a href="/a"><i class="fa fa-snowflake-o"></i> Accueil</a></li>
+            <li><a href="#"><i class="fa fa-list-alt"></i>Graphs</a></li>
+            <li><a href="#"><i class="fa fa-bar-chart"></i> Reports</a></li>
+            <li><a href="#"><i class="fa fa-user"></i> Contacts</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="col-sm-7">
+        <div class="mid">
+          <div class="header-info">
+            <h2>Dashboard</h2>
+            <div>
+             {{ form(Selection) }}
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-sm-3">
+              <div class="count">
+                <h2>8</h2> <span class="small">Active<br>Contacts</span>
+              </div>
+            </div>
+            <div class="col-sm-3">
+              <div class="count">
+                <h2>4</h2> <span class="small">Awaiting<br>Signatures</span>
+              </div>
+            </div>
+            <div class="col-sm-3">
+              <div class="count">
+                <h2>3</h2> <span class="small">Priority<br>Contracts</span>
+              </div>
+            </div>
+            <div class="col-sm-3">
+              <div class="count">
+                <h2>1</h2> <span class="small">Approval<br>Requests</span>
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="chart">
+              <div class="col-sm-8">
+
+<div id="chart_div" style="width: 100%; height: 300px; margin-top: 20px;"></div>
+               
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-sm-3">
+        <div class="right">
+          <div class="header-info">
+            <h4>Upcoming Activities</h4>
+          </div>
+          <ul class="activity">
+            <li>
+              <h5>Activityname <small class="">Today, 18:00</small></h5>
+              <p>Description goes here, it may be extremely long...</p>
+            </li>
+            <li>
+              <h5>Activityname <small class="">Today, 18:00</small></h5>
+              <p>Description goes here, it may be extremely long...</p>
+            </li>
+            <li>
+              <h5>Activityname <small class="">Today, 18:00</small></h5>
+              <p>Description goes here, it may be extremely long...</p>
+            </li>
+          </ul>
+          <p class="by">Inspired by <a href="https://bit.ly/2DkHVY5" target="_blank">Lay</a></p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div> 
+
+</body>
+
+</html>

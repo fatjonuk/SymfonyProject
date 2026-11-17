@@ -1,0 +1,19 @@
+{% extends 'SalleTpBundle::layout.html.twig' %}
+
+{% block title %}Exemple{% endblock %}
+
+{% block content %}
+<table>
+{% for a in examens %}
+    <tr>
+	<td>{{ examens.iRM }}</td>
+	<td>{{ examens.Scanner }}</td>
+    </tr>
+{% else %}
+    <tr>
+	<td>Aucun examen n'a été trouvé.</td>
+    </tr>
+{% endfor %}
+</table>
+
+{% endblock %}

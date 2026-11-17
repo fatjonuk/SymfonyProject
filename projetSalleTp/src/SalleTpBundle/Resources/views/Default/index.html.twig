@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<link rel="stylesheet" href="{{ asset('bundles/salletp/css/style.css') }}" type="text/css" media="all" />
+<head>
+
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+  <title>Menu Navigation</title>
+
+
+</head>
+
+<body>
+
+  <div class="center">
+
+
+    <div class="menu">
+
+      <div class="bouton-Menu">
+        <div class="menu-icon">
+          <i class="fas fa-hotel"></i>
+        </div>
+        <p class="menu-text">Accueil</p>
+      </div>
+
+      <div class="bouton-Menu">
+        <div class="menu-icon">
+          <i class="fas fa-chart-area"></i>
+        </div>
+        <p class="menu-text">Stats</p>
+      </div>
+
+      <a href="/connection">
+      <div class="bouton-Menu">
+        <div class="menu-icon">
+          <i class="fas fa-user-tie"></i>
+        </div>
+          <p class="menu-text">Connexion</p>
+        </div>
+      </a>
+
+    </div>
+  </div>
+
+{{ form(monFormulaire) }}
+
+</body>
+
+  <script defer src="https://use.fontawesome.com/releases/v5.8.1/js/all.js"
+    integrity="sha384-g5uSoOSBd7KkhAMlnQILrecXvzst9TdC09/VM+pjDTCM+1il8RHz5fKANTFFb+gQ" crossorigin="anonymous">
+  </script>
+
+</html>
