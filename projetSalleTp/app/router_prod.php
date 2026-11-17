@@ -17,6 +17,9 @@ if (PHP_SAPI !== 'cli-server') {
     exit;
 }
 
+ini_set('display_errors', '0');
+error_reporting(E_ALL & ~E_DEPRECATED & ~E_USER_DEPRECATED & ~E_WARNING);
+
 $web = realpath(__DIR__.'/../web');
 $path = rawurldecode(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH));
 
