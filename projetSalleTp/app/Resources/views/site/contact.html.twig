@@ -1,0 +1,43 @@
+{% extends 'site/layout.html.twig' %}
+
+{% block title %}Contact — {{ site.name }}{% endblock %}
+{% block description %}Décrivez votre projet électrique : tableau, prises, éclairage, cuisine, chauffage, photovoltaïque ou borne de recharge.{% endblock %}
+{% block body_class %}page-content{% endblock %}
+
+{% block body %}
+<section class="page-hero">
+    <p class="eyebrow"><span aria-hidden="true"></span>Contact</p>
+    <h1>Parlons de <em>votre projet.</em></h1>
+    <p class="lead">Quelques mots suffisent : le type de logement, les travaux envisagés et vos disponibilités.</p>
+</section>
+
+<section class="contact">
+    {% for message in app.flashes('contact_success') %}
+        <div class="notice notice--success" role="status">{{ message }}</div>
+    {% endfor %}
+
+    {{ form_start(form, { attr: { class: 'contact-form', novalidate: 'novalidate' } }) }}
+        <div class="contact-form__grid">
+            {% for field in [form.name, form.email, form.phone, form.subject] %}
+                <div class="field{% if field.vars.errors|length %} field--error{% endif %}">
+                    {{ form_label(field) }}
+                    {{ form_widget(field) }}
+                    {% for error in field.vars.errors %}<p class="field__error">{{ error.message }}</p>{% endfor %}
+                </div>
+            {% endfor %}
+        </div>
+        <div class="field{% if form.message.vars.errors|length %} field--error{% endif %}">
+            {{ form_label(form.message) }}
+            {{ form_widget(form.message) }}
+            {% for error in form.message.vars.errors %}<p class="field__error">{{ error.message }}</p>{% endfor %}
+        </div>
+        <div class="field field--check{% if form.consent.vars.errors|length %} field--error{% endif %}">
+            {{ form_widget(form.consent) }}
+            {{ form_label(form.consent) }}
+            {% for error in form.consent.vars.errors %}<p class="field__error">{{ error.message }}</p>{% endfor %}
+        </div>
+        {{ form_errors(form) }}
+        <button class="tour-btn tour-btn--primary" type="submit">Envoyer ma demande</button>
+    {{ form_end(form) }}
+</section>
+{% endblock %}

@@ -1,5 +1,6 @@
+# The home page "/" is now the 3D house tour (AppBundle\Controller\HouseTourController).
 salle_tp_homepage:
-    path:     /
+    path:     /salle-tp
     defaults: { _controller: SalleTpBundle:Default:index2 }
 site_connectin:
     path:     /connection

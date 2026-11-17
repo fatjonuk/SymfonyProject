@@ -1,0 +1,270 @@
+# ---------------------------------------------------------------------------
+# Visite 3D « Explorez l'électricité de votre maison »
+#
+# Configuration centrale du parcours : textes, ordre des étapes, positions de
+# caméra et points interactifs (hotspots). Twig s'en sert pour écrire les
+# panneaux en HTML, le JavaScript pour piloter la caméra.
+#
+# Coordonnées en mètres, repère de la maison :
+#   x : de gauche (-) à droite (+) en regardant la façade avant
+#   y : hauteur (0 = sol fini du rez-de-chaussée, 3,3 = sol de l'étage)
+#   z : de l'arrière (-) vers la rue (+)
+#
+# camera.position : où se trouve la caméra à l'arrêt sur l'étape
+# camera.target   : le point regardé
+# camera.fov      : angle de vue vertical (degrés) sur écran large
+# camera.via      : points de passage avant d'arriver à l'étape (trajectoire)
+# camera.travel   : déplacement lent pendant l'étape (facultatif)
+# camera.duration : longueur relative de la transition (en « pages » de scroll)
+# ---------------------------------------------------------------------------
+
+site:
+    name: 'UGB Électricité'
+    tagline: 'L’énergie de vos projets, la confiance en plus.'
+
+intro:
+    title: 'L’électricité au cœur de votre maison'
+    subtitle: 'Découvrez comment chaque installation électrique contribue à votre confort, votre sécurité et votre quotidien.'
+    hint: 'Faites défiler pour explorer la maison'
+    camera:
+        position: [-19.0, 6.4, 22.0]
+        target: [-2.6, 2.6, 0.6]
+        fov: 34
+
+steps:
+    -   id: tableau
+        nav: 'Tableau'
+        category: 'Distribution et protection'
+        title: 'Le tableau électrique'
+        subtitle: 'Le centre de contrôle de votre installation.'
+        description: 'Le tableau électrique répartit l’électricité vers les différents circuits de la maison. Il regroupe des dispositifs de protection qui contribuent à la sécurité des personnes et des installations.'
+        details:
+            - 'Il organise les circuits électriques.'
+            - 'Les disjoncteurs protègent les circuits contre les surintensités.'
+            - 'Les dispositifs différentiels contribuent à protéger les personnes contre certains défauts électriques.'
+            - 'Un repérage clair facilite l’identification des circuits.'
+        button: 'Découvrir les protections'
+        more:
+            title: 'Les protections du tableau'
+            paragraphs:
+                - 'Qu’est-ce que c’est ? Un coffret qui reçoit l’alimentation de la maison et la répartit en plusieurs circuits : éclairage, prises, appareils spécialisés…'
+                - 'À quoi sert-il ? Chaque circuit part d’un disjoncteur qui coupe automatiquement en cas de surcharge ou de court-circuit. Les interrupteurs différentiels surveillent les fuites de courant, qui peuvent signaler un défaut d’isolement.'
+                - 'Pourquoi est-ce important ? Un tableau bien conçu et bien repéré protège les personnes et les biens, et permet d’isoler un seul circuit sans couper toute la maison.'
+                - 'Toute intervention dans un tableau électrique doit être confiée à un professionnel qualifié, installation hors tension.'
+        camera:
+            duration: 3.2
+            via:
+                - { position: [-9.0, 3.2, 14.0], target: [-4.85, 1.9, 4.3] }
+                - { position: [-4.85, 1.65, 8.2], target: [-4.85, 1.55, 3.0] }
+                - { position: [-4.85, 1.6, 4.35], target: [-5.25, 1.5, 1.5] }
+            position: [-5.4, 1.55, 2.62]
+            target: [-5.62, 1.45, 1.33]
+            fov: 50
+        hotspots:
+            - { id: hs-general, label: 'Interrupteur général', position: [-5.82, 1.76, 1.47], text: 'Il permet de couper l’alimentation de l’ensemble des circuits de la maison.' }
+            - { id: hs-differentiel, label: 'Interrupteurs différentiels', position: [-5.82, 1.35, 1.47], text: 'Chaque rangée est protégée par un interrupteur différentiel. Il détecte certaines fuites de courant et coupe les circuits qu’il protège.' }
+            - { id: hs-divisionnaires, label: 'Disjoncteurs divisionnaires', position: [-5.6, 1.55, 1.47], text: 'Un disjoncteur par circuit : il coupe automatiquement en cas de surcharge ou de court-circuit sur ce circuit.' }
+            - { id: hs-reperage, label: 'Repérage des circuits', position: [-5.48, 1.10, 1.47], text: 'Chaque protection est étiquetée avec le nom du circuit qu’elle alimente, pour retrouver facilement « prises du salon » ou « éclairage cuisine ».' }
+
+    -   id: prises
+        nav: 'Prises'
+        category: 'Alimentation'
+        title: 'Les prises électriques'
+        subtitle: 'L’énergie disponible partout où vous en avez besoin.'
+        description: 'Les prises électriques permettent de brancher les équipements du quotidien : télévision, ordinateur, chargeur ou petit électroménager. Leur implantation et leur protection doivent être adaptées à l’usage de chaque pièce.'
+        details:
+            - 'Distribution de l’énergie vers les appareils.'
+            - 'Prise avec terre lorsque l’installation le prévoit.'
+            - 'Circuits protégés par des dispositifs adaptés.'
+            - 'Répartition pensée pour le confort et la sécurité.'
+        button: 'Comprendre les circuits de prises'
+        more:
+            title: 'Les circuits de prises'
+            paragraphs:
+                - 'Qu’est-ce que c’est ? Une prise de courant est le point d’accès à l’électricité pour un appareil mobile. Plusieurs prises sont regroupées sur un même circuit, qui part d’un disjoncteur du tableau.'
+                - 'À quoi sert-il ? Le circuit amène l’énergie depuis le tableau jusqu’aux prises d’une ou plusieurs pièces. La ligne lumineuse affichée dans la maison illustre ce trajet.'
+                - 'Pourquoi est-ce important ? Le nombre de prises, leur emplacement et le dimensionnement des circuits sont prévus selon les usages, pour éviter les surcharges et les rallonges multiples.'
+                - 'Le tracé affiché est une représentation pédagogique, pas un schéma de câblage.'
+        camera:
+            duration: 1.9
+            via:
+                - { position: [-4.65, 1.6, 2.95], target: [-3.0, 1.4, 2.75] }
+                - { position: [-3.5, 1.6, 2.75], target: [-2.0, 0.9, -1.0] }
+                - { position: [-2.95, 1.35, 0.0], target: [-2.4, 0.5, -4.0] }
+            position: [-2.85, 0.95, -2.5]
+            target: [-2.35, 0.33, -4.19]
+            fov: 52
+        hotspots:
+            - { id: hs-prise-salon, label: 'Prise de courant', position: [-2.4, 0.3, -4.15], text: 'Prise murale avec terre, positionnée près du meuble pour éviter les rallonges.' }
+            - { id: hs-prise-tv, label: 'Prises multimédia', position: [-0.3, 0.3, -4.15], text: 'Derrière le meuble TV : énergie et réseau regroupés pour les équipements multimédia.' }
+
+    -   id: lumieres
+        nav: 'Lumières'
+        category: 'Éclairage'
+        title: 'Les luminaires'
+        subtitle: 'Une lumière adaptée à chaque moment de vie.'
+        description: 'L’éclairage électrique permet de créer des ambiances adaptées aux besoins de chaque pièce. Les solutions LED offrent différentes températures de couleur et peuvent être associées à des systèmes de variation ou de commande intelligente.'
+        details:
+            - 'Éclairage général et éclairage d’ambiance.'
+            - 'Technologie LED.'
+            - 'Interrupteurs et commandes.'
+            - 'Possibilités de variation d’intensité.'
+            - 'Confort visuel et consommation maîtrisée.'
+        button: 'Allumer / Éteindre'
+        action: lights
+        camera:
+            duration: 1.6
+            via:
+                - { position: [-1.3, 1.25, -3.0], target: [1.5, 2.1, -1.6] }
+            position: [2.45, 1.45, -3.1]
+            target: [-1.4, 2.25, 1.15]
+            fov: 60
+        hotspots:
+            - { id: hs-spots, label: 'Spots encastrés', position: [0.0, 2.95, -2.0], text: 'Spots LED encastrés au plafond : un éclairage général homogène, sans éblouissement.' }
+            - { id: hs-ruban, label: 'Éclairage indirect', position: [-0.3, 1.62, -4.08], text: 'Un ruban LED derrière l’écran crée un éclairage d’ambiance doux, par réflexion sur le mur.' }
+            - { id: hs-inter, label: 'Interrupteur', position: [-3.42, 1.15, 1.95], text: 'Commande des spots du salon. Elle peut être associée à un variateur.' }
+            - { id: hs-lampadaire, label: 'Lampadaire', position: [-2.4, 1.65, 0.55], text: 'Un point lumineux d’appoint, branché sur une prise, pour la lecture ou la détente.' }
+
+    -   id: cuisine
+        nav: 'Cuisine'
+        category: 'Équipements spécialisés'
+        title: 'L’électricité dans la cuisine'
+        subtitle: 'Des installations adaptées à une pièce très sollicitée.'
+        description: 'La cuisine réunit de nombreux appareils électriques. Certains équipements nécessitent des circuits spécialisés, conçus en fonction de leurs caractéristiques et des règles d’installation applicables. Une bonne conception facilite leur utilisation tout en contribuant à la sécurité.'
+        details:
+            - 'Circuits adaptés aux différents appareils.'
+            - 'Protection électrique appropriée.'
+            - 'Organisation des prises.'
+            - 'Éclairage fonctionnel du plan de travail.'
+            - 'Prise en compte de la puissance des équipements.'
+        camera:
+            duration: 1.9
+            via:
+                - { position: [2.3, 1.55, -0.6], target: [4.6, 1.2, -2.4] }
+            position: [3.1, 1.65, 1.05]
+            target: [4.9, 1.0, -3.0]
+            fov: 55
+            travel:
+                position: [5.25, 1.62, 0.55]
+                target: [5.35, 1.0, -3.2]
+        hotspots:
+            - { id: hs-four, label: 'Four', position: [5.75, 1.15, -3.58], text: 'Le four dispose de son propre circuit, indépendant des prises du plan de travail.' }
+            - { id: hs-plaque, label: 'Plaque de cuisson', position: [5.3, 0.95, -1.2], text: 'Appareil de forte puissance : il est alimenté par un circuit spécialisé, dimensionné selon le modèle installé.' }
+            - { id: hs-lave-vaisselle, label: 'Lave-vaisselle', position: [4.55, 0.55, -3.55], text: 'Un circuit dédié, avec une protection adaptée à un appareil qui associe eau et électricité.' }
+            - { id: hs-frigo, label: 'Réfrigérateur', position: [6.4, 1.3, -3.58], text: 'Il fonctionne en permanence : sa prise est accessible et placée sur un circuit adapté.' }
+            - { id: hs-prises-pdt, label: 'Prises du plan de travail', position: [3.75, 1.1, -4.15], text: 'Des prises au-dessus du plan de travail, à distance de l’évier, pour le petit électroménager.' }
+            - { id: hs-led-meubles, label: 'Éclairage sous meubles', position: [4.4, 1.43, -3.95], text: 'Un ruban LED sous les meubles hauts éclaire directement le plan de travail.' }
+
+    -   id: seche-serviettes
+        nav: 'Sèche-serviettes'
+        category: 'Confort thermique'
+        title: 'Le sèche-serviettes électrique'
+        subtitle: 'Un confort supplémentaire dans la salle de bain.'
+        description: 'Le sèche-serviettes électrique permet de chauffer les serviettes et, selon le modèle et son dimensionnement, de participer au chauffage de la salle de bain. Certains appareils proposent une programmation pour adapter leur fonctionnement aux habitudes des occupants.'
+        details:
+            - 'Chauffage et séchage des serviettes.'
+            - 'Réglage de température selon le modèle.'
+            - 'Possibilité de programmation.'
+            - 'Installation adaptée aux règles de sécurité propres aux salles d’eau.'
+        button: 'Voir son fonctionnement'
+        more:
+            title: 'Programmation et régulation'
+            paragraphs:
+                - 'Qu’est-ce que c’est ? Un radiateur électrique en forme d’échelle, fixé au mur, sur lequel on suspend les serviettes.'
+                - 'À quoi sert-il ? Un thermostat maintient la température choisie. Selon le modèle, une programmation permet par exemple de chauffer avant le réveil, avec parfois une fonction « boost » temporaire.'
+                - 'Pourquoi est-ce important ? Il apporte du confort et aide à sécher les serviettes. Dans une salle d’eau, son emplacement et son raccordement suivent des règles de sécurité spécifiques, liées à la présence d’eau.'
+        camera:
+            duration: 3.6
+            via:
+                - { position: [4.0, 1.65, 1.35], target: [0.0, 1.6, -0.6] }
+                - { position: [-1.2, 1.65, -1.85], target: [-4.6, 1.7, -3.2] }
+                - { position: [-4.4, 1.66, -3.2], target: [-6.15, 1.9, -3.45] }
+                - { position: [-5.55, 1.72, -3.72], target: [-6.15, 2.8, 0.0] }
+                - { position: [-6.15, 2.2, -3.3], target: [-6.15, 3.6, 0.4] }
+                - { position: [-6.15, 3.55, -1.5], target: [-6.15, 4.85, 1.2] }
+                - { position: [-6.15, 4.85, 0.45], target: [-4.6, 4.85, 0.55] }
+                - { position: [-4.95, 4.88, 0.5], target: [-4.25, 4.8, 3.0] }
+                - { position: [-4.25, 4.85, 1.25], target: [-5.8, 4.55, 2.3] }
+            position: [-4.3, 4.75, 1.95]
+            target: [-6.62, 4.25, 2.35]
+            fov: 55
+        hotspots:
+            - { id: hs-seche, label: 'Sèche-serviettes', position: [-6.6, 4.4, 2.35], text: 'Radiateur sèche-serviettes électrique, avec thermostat et programmation selon le modèle.' }
+            - { id: hs-miroir, label: 'Miroir lumineux', position: [-3.3, 4.55, 1.3], text: 'Un éclairage adapté aux pièces humides, autour du miroir et au plafond.' }
+
+    -   id: solaire
+        nav: 'Panneaux solaires'
+        category: 'Production d’énergie'
+        title: 'Les panneaux photovoltaïques'
+        subtitle: 'Produire de l’électricité grâce à l’énergie solaire.'
+        description: 'Les panneaux photovoltaïques transforment une partie de l’énergie lumineuse du soleil en électricité. Un onduleur permet ensuite de rendre cette énergie compatible avec les usages électriques de l’habitation. La production dépend notamment de l’ensoleillement et des caractéristiques de l’installation.'
+        details:
+            - 'Production d’électricité solaire.'
+            - 'Possibilité d’autoconsommation.'
+            - 'Conversion du courant par un onduleur.'
+            - 'Production variable selon la météo et l’heure.'
+            - 'Possibilité de stockage uniquement lorsqu’un système adapté est installé.'
+        button: 'Comprendre l’énergie solaire'
+        action: solar
+        more:
+            title: 'Comment fonctionne une installation photovoltaïque ?'
+            paragraphs:
+                - 'Les panneaux produisent un courant continu lorsqu’ils reçoivent de la lumière. La production est plus forte en milieu de journée et par beau temps ; elle est nulle la nuit.'
+                - 'L’onduleur transforme ce courant continu en courant alternatif, compatible avec les appareils de la maison. Il est raccordé au tableau électrique par un circuit dédié et protégé.'
+                - 'L’électricité produite est consommée en priorité par la maison (autoconsommation). Selon le contrat choisi, le surplus peut être injecté sur le réseau ; il ne peut être stocké que si une batterie adaptée est installée.'
+        camera:
+            duration: 3.0
+            via:
+                - { position: [-4.55, 6.0, 2.05], target: [-4.4, 8.3, 4.6] }
+                - { position: [-3.6, 7.8, 5.6], target: [0.0, 7.5, 9.5] }
+                - { position: [-0.5, 9.6, 10.6], target: [2.0, 6.6, -1.0] }
+            position: [7.2, 13.6, 10.6]
+            target: [2.3, 6.6, -1.7]
+            fov: 40
+        hotspots:
+            - { id: hs-pv, label: 'Panneaux photovoltaïques', position: [2.3, 7.0, -1.9], text: 'Ils convertissent une partie de la lumière du soleil en électricité (courant continu).' }
+            - { id: hs-pv-cable, label: 'Liaison vers l’onduleur', position: [-6.95, 5.2, 0.9], text: 'Le courant produit descend jusqu’à l’onduleur, installé dans l’entrée à côté du tableau électrique.' }
+
+    -   id: borne
+        nav: 'Borne électrique'
+        category: 'Mobilité électrique'
+        title: 'La borne de recharge'
+        subtitle: 'Rechargez votre véhicule directement à domicile.'
+        description: 'Une borne de recharge résidentielle permet de recharger un véhicule électrique à domicile à l’aide d’une installation dédiée. Sa puissance et ses fonctionnalités dépendent notamment du matériel choisi, du véhicule et des caractéristiques de l’installation électrique.'
+        details:
+            - 'Recharge à domicile.'
+            - 'Circuit électrique dédié et protections adaptées.'
+            - 'Gestion éventuelle de la puissance.'
+            - 'Possibilités de programmation.'
+            - 'Compatibilité à vérifier selon le véhicule et la borne.'
+        button: 'Découvrir la recharge'
+        action: charge
+        more:
+            title: 'La recharge à domicile'
+            paragraphs:
+                - 'Qu’est-ce que c’est ? Une borne murale ou sur pied, raccordée au tableau électrique par un circuit qui lui est réservé, avec ses propres protections.'
+                - 'À quoi sert-elle ? Elle recharge le véhicule en toute sécurité, souvent la nuit. Selon le matériel, la charge peut être programmée et la puissance ajustée pour tenir compte des autres consommations de la maison.'
+                - 'Pourquoi est-ce important ? Une installation dédiée évite de solliciter une prise ordinaire pendant de longues heures. La compatibilité entre la borne et le véhicule se vérifie au cas par cas.'
+                - 'L’indicateur de charge affiché ici est purement illustratif.'
+        camera:
+            duration: 2.6
+            via:
+                - { position: [0.5, 9.2, 15.0], target: [-5.0, 2.2, 4.0] }
+                - { position: [-8.0, 3.4, 10.6], target: [-7.3, 1.2, 2.4] }
+            position: [-9.25, 1.5, 7.3]
+            target: [-7.35, 1.05, 2.3]
+            fov: 46
+        hotspots:
+            - { id: hs-borne, label: 'Borne de recharge', position: [-7.12, 1.25, 2.2], text: 'Borne murale raccordée au tableau par un circuit dédié et protégé.' }
+            - { id: hs-cable, label: 'Câble de recharge', position: [-8.1, 0.75, 2.75], text: 'Le câble relie la borne à la prise de recharge du véhicule.' }
+
+final:
+    title: 'Une maison, des installations essentielles.'
+    subtitle: 'De la distribution électrique à la production solaire, découvrez comment les équipements de votre habitation participent à votre confort, votre sécurité et vos usages quotidiens.'
+    camera:
+        duration: 2.2
+        via:
+            - { position: [-7.0, 5.5, 15.0], target: [-3.0, 3.0, 1.0] }
+        position: [-23.0, 13.0, 28.5]
+        target: [-1.5, 3.2, 0.0]
+        fov: 34

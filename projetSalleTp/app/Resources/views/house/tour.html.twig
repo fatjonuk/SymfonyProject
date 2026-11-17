@@ -1,0 +1,97 @@
+{% extends 'site/layout.html.twig' %}
+
+{% block title %}Explorez l’électricité de votre maison — {{ site.name }}{% endblock %}
+{% block description %}{{ intro.subtitle }}{% endblock %}
+{% block body_class %}page-tour{% endblock %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" href="{{ asset('house-tour/css/house-tour.css') }}">
+{% endblock %}
+
+{% block body %}
+<section class="tour" id="visite" data-tour aria-label="Visite interactive de la maison">
+    {# Pinned stage: the 3D scene and its interface stay on screen while the
+       page scroll drives the camera through the house. #}
+    <div class="tour-stage" data-tour-stage>
+        <canvas class="tour-canvas" data-tour-canvas aria-hidden="true"></canvas>
+        <div class="tour-hotspots" data-hotspots aria-label="Points d’intérêt"></div>
+        <div class="tour-veil" data-veil aria-hidden="true"></div>
+
+        <div class="tour-intro" data-intro>
+            <p class="tour-intro__eyebrow"><span aria-hidden="true"></span>Visite interactive</p>
+            <h1 class="tour-intro__title">{{ intro.title }}</h1>
+            <p class="tour-intro__subtitle">{{ intro.subtitle }}</p>
+            <p class="tour-intro__hint" data-js-only>
+                <span class="scroll-mouse" aria-hidden="true"></span>
+                {{ intro.hint }}
+            </p>
+        </div>
+
+        <div class="tour-panels" data-panels>
+            {% for step in steps %}
+                {{ include('house/_panel.html.twig', { step: step }) }}
+            {% endfor %}
+        </div>
+
+        <div class="tour-final" data-final>
+            <h2 class="tour-final__title">{{ final.title }}</h2>
+            <p class="tour-final__subtitle">{{ final.subtitle }}</p>
+            <div class="tour-final__actions">
+                <button class="tour-btn tour-btn--primary" type="button" data-action="restart" data-js-only>Recommencer la visite</button>
+                <a class="tour-btn tour-btn--ghost" href="{{ path('site_services') }}">Découvrir nos services</a>
+                <a class="tour-btn tour-btn--ghost" href="{{ path('site_contact') }}">Nous contacter</a>
+            </div>
+        </div>
+
+        <nav class="tour-rail" aria-label="Étapes de la visite" data-rail data-js-only>
+            <p class="tour-rail__counter" aria-hidden="true"><span data-counter>00</span> / {{ '%02d'|format(steps|length) }}</p>
+            <ol class="tour-rail__list">
+                {% for step in steps %}
+                    <li>
+                        <button type="button" class="tour-rail__item" data-goto="{{ step.number }}" aria-label="Étape {{ step.number }} : {{ step.title }}">
+                            <span class="tour-rail__dot" aria-hidden="true"></span>
+                            <span class="tour-rail__label">{{ step.nav }}</span>
+                        </button>
+                    </li>
+                {% endfor %}
+            </ol>
+        </nav>
+
+        <div class="tour-progress" aria-hidden="true"><span data-progress></span></div>
+
+        <aside class="tour-sheet" data-sheet role="dialog" aria-modal="false" aria-labelledby="tour-sheet-title" hidden>
+            <button class="tour-sheet__close" type="button" data-sheet-close aria-label="Fermer la fiche">
+                <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+            </button>
+            <div class="tour-sheet__body" data-sheet-body></div>
+        </aside>
+
+        <div class="tour-loader" data-loader role="status" aria-live="polite">
+            <div class="tour-loader__inner">
+                <p class="tour-loader__label">Préparation de votre visite…</p>
+                <div class="tour-loader__bar"><span data-loader-bar></span></div>
+                <p class="tour-loader__value"><span data-loader-value>0</span> %</p>
+            </div>
+        </div>
+
+        <p class="sr-only" aria-live="polite" data-announce></p>
+    </div>
+</section>
+
+<script type="application/json" id="tour-config">{{ tour_js|json_encode|raw }}</script>
+{% endblock %}
+
+{% block javascripts %}
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "{{ asset('house-tour/vendor/three/three.module.min.js') }}",
+                "three/addons/": "{{ asset('house-tour/vendor/three/addons/') }}"
+            }
+        }
+    </script>
+    <script src="{{ asset('house-tour/vendor/gsap/gsap.min.js') }}" defer></script>
+    <script src="{{ asset('house-tour/vendor/gsap/ScrollTrigger.min.js') }}" defer></script>
+    <script src="{{ asset('house-tour/vendor/gsap/ScrollToPlugin.min.js') }}" defer></script>
+    <script type="module" src="{{ asset('house-tour/js/main.js') }}"></script>
+{% endblock %}

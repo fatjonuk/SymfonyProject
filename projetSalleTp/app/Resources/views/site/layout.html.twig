@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="fr" class="no-js">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="theme-color" content="#0D1B3D">
+    <title>{% block title %}{{ site.name }}{% endblock %}</title>
+    <meta name="description" content="{% block description %}{{ site.tagline }}{% endblock %}">
+    <link rel="icon" href="{{ asset('favicon.ico') }}">
+    <link rel="preload" href="{{ asset('house-tour/fonts/manrope-latin-wght-normal.woff2') }}" as="font" type="font/woff2" crossorigin>
+    <link rel="stylesheet" href="{{ asset('house-tour/css/site.css') }}">
+    {% block stylesheets %}{% endblock %}
+    <script>document.documentElement.classList.replace('no-js', 'js');</script>
+</head>
+<body class="{% block body_class %}{% endblock %}">
+    <a class="skip-link" href="#contenu">Aller au contenu</a>
+
+    <header class="site-header" data-site-header>
+        <div class="site-header__inner">
+            <a class="brand" href="{{ path('homepage') }}" aria-label="{{ site.name }} — accueil">
+                <svg class="brand__mark" width="34" height="34" viewBox="0 0 40 40" aria-hidden="true">
+                    <rect x="1" y="1" width="38" height="38" rx="11" fill="#F2B705"/>
+                    <path d="M22.5 7 11 22.5h8L17.5 33 29 17.5h-8L22.5 7Z" fill="#0D1B3D"/>
+                </svg>
+                <span class="brand__text"><strong>UGB</strong><small>Électricité</small></span>
+            </a>
+            <nav class="site-nav" aria-label="Navigation principale">
+                {% set route = app.request.attributes.get('_route') %}
+                <ul class="site-nav__list" id="site-menu" data-menu>
+                    <li><a href="{{ path('homepage') }}" {% if route == 'homepage' %}aria-current="page"{% endif %}>Accueil</a></li>
+                    <li><a href="{{ path('house_tour') }}#visite" {% if route == 'house_tour' %}aria-current="page"{% endif %}>Visite interactive</a></li>
+                    <li><a href="{{ path('site_services') }}" {% if route == 'site_services' %}aria-current="page"{% endif %}>Nos prestations</a></li>
+                    <li><a href="{{ path('site_contact') }}" {% if route == 'site_contact' %}aria-current="page"{% endif %}>Contact</a></li>
+                </ul>
+                <button class="site-nav__toggle" type="button" aria-expanded="false" aria-controls="site-menu" data-menu-toggle>
+                    <span class="sr-only">Menu</span>
+                    <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" fill="none"/></svg>
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <main id="contenu" tabindex="-1">
+        {% block body %}{% endblock %}
+    </main>
+
+    <footer class="site-footer">
+        <div class="site-footer__inner">
+            <div>
+                <p class="site-footer__brand">{{ site.name }}</p>
+                <p class="site-footer__tagline">{{ site.tagline }}</p>
+            </div>
+            <ul class="site-footer__links">
+                <li><a href="{{ path('house_tour') }}#visite">Visite interactive</a></li>
+                <li><a href="{{ path('site_services') }}">Nos prestations</a></li>
+                <li><a href="{{ path('site_contact') }}">Contact</a></li>
+                <li><a href="{{ path('salle_tp_homepage') }}">Application Salle TP</a></li>
+            </ul>
+            <p class="site-footer__note">La maison présentée est une illustration pédagogique : elle ne constitue ni un plan d’installation ni une validation de conformité.</p>
+        </div>
+    </footer>
+
+    <script src="{{ asset('house-tour/js/site.js') }}" defer></script>
+    {% block javascripts %}{% endblock %}
+</body>
+</html>

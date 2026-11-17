@@ -33,3 +33,7 @@ services:
     # AppBundle\Service\ExampleService:
     #     arguments:
     #         $someArgument: 'some_value'
+
+    # Central configuration of the 3D house tour
+    AppBundle\HouseTour\TourConfig:
+        arguments: ['%kernel.project_dir%/app/config/house_tour.yml']

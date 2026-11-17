@@ -1,0 +1,35 @@
+{% extends 'site/layout.html.twig' %}
+
+{% block title %}Nos prestations — {{ site.name }}{% endblock %}
+{% block description %}Installation, mise en sécurité, éclairage, équipements de cuisine, chauffage électrique, photovoltaïque et bornes de recharge.{% endblock %}
+{% block body_class %}page-content{% endblock %}
+
+{% block body %}
+<section class="page-hero">
+    <p class="eyebrow"><span aria-hidden="true"></span>Nos prestations</p>
+    <h1>Toute l’électricité de votre maison, <em>du tableau jusqu’au toit.</em></h1>
+    <p class="lead">Chaque étape de la visite correspond à un domaine dans lequel nous pouvons vous accompagner : étude, installation, rénovation et mise en sécurité.</p>
+</section>
+
+<section class="service-grid" aria-label="Domaines d’intervention">
+    {% for step in steps %}
+        <article class="service-card">
+            <img src="{{ asset('house-tour/img/steps/' ~ step.id ~ '.jpg') }}" alt="" loading="lazy" width="1200" height="800">
+            <div class="service-card__body">
+                <p class="service-card__num">{{ '%02d'|format(step.number) }} — {{ step.category }}</p>
+                <h2>{{ step.title }}</h2>
+                <p>{{ step.description }}</p>
+                <a class="link-arrow" href="{{ path('house_tour') }}#etape-{{ step.id }}">Voir dans la visite</a>
+            </div>
+        </article>
+    {% endfor %}
+    <article class="service-card service-card--cta">
+        <div class="service-card__body">
+            <p class="service-card__num">Votre projet</p>
+            <h2>Parlons de votre installation.</h2>
+            <p>Décrivez-nous votre besoin : nous revenons vers vous pour en discuter.</p>
+            <a class="tour-btn tour-btn--primary" href="{{ path('site_contact') }}">Nous contacter</a>
+        </div>
+    </article>
+</section>
+{% endblock %}

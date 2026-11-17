@@ -1,0 +1,57 @@
+{# One educational panel of the tour. Rendered as real HTML so the content
+   stays readable without WebGL, without JavaScript and for assistive tech. #}
+<article class="tour-panel" id="etape-{{ step.id }}" data-panel="{{ step.number }}" aria-labelledby="titre-{{ step.id }}">
+    <figure class="tour-panel__figure">
+        <img src="{{ asset('house-tour/img/steps/' ~ step.id ~ '.jpg') }}" alt="" loading="lazy" width="1200" height="800">
+    </figure>
+    <p class="tour-panel__eyebrow">
+        <span class="tour-panel__num">{{ '%02d'|format(step.number) }}</span>
+        <span class="tour-panel__sep" aria-hidden="true"></span>
+        {{ step.category }}
+    </p>
+    <h2 class="tour-panel__title" id="titre-{{ step.id }}">{{ step.title }}</h2>
+    <p class="tour-panel__subtitle">{{ step.subtitle }}</p>
+    <p class="tour-panel__desc">{{ step.description }}</p>
+    <ul class="tour-panel__details">
+        {% for detail in step.details %}
+            <li>{{ detail }}</li>
+        {% endfor %}
+    </ul>
+
+    {% if step.action == 'lights' %}
+        <div class="tour-panel__controls" data-js-only>
+            <button class="tour-btn tour-btn--primary" type="button" data-action="lights-toggle" aria-pressed="true">
+                <span class="tour-btn__dot" aria-hidden="true"></span>
+                <span data-label>Éteindre</span>
+            </button>
+            <label class="tour-slider">
+                <span>Intensité</span>
+                <input type="range" min="0" max="100" value="100" data-action="lights-dim" aria-label="Intensité de l’éclairage du salon">
+            </label>
+        </div>
+    {% elseif step.button %}
+        <div class="tour-panel__controls" data-js-only>
+            <button class="tour-btn tour-btn--primary" type="button" data-action="{{ step.action ?: 'more' }}" data-step-id="{{ step.id }}">
+                {{ step.button }}
+            </button>
+        </div>
+    {% endif %}
+
+    {% if step.more %}
+        <template data-more="{{ step.id }}">
+            <h3>{{ step.more.title }}</h3>
+            {% if step.action == 'solar' %}
+                {{ include('house/_solar_diagram.html.twig') }}
+            {% endif %}
+            {% for paragraph in step.more.paragraphs %}
+                <p>{{ paragraph }}</p>
+            {% endfor %}
+        </template>
+        <details class="tour-panel__more-static">
+            <summary>{{ step.more.title }}</summary>
+            {% for paragraph in step.more.paragraphs %}
+                <p>{{ paragraph }}</p>
+            {% endfor %}
+        </details>
+    {% endif %}
+</article>
