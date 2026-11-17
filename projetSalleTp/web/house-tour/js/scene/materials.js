@@ -97,7 +97,7 @@ export function createMaterials() {
         deviceWhite: std({ color: '#f7f7f5', roughness: 0.35 }),
         deviceGrey: std({ color: '#d5d6d8', roughness: 0.45 }),
         lightHousing: std({ color: '#f4f4f2', roughness: 0.4 }),
-        carPaint: new THREE.MeshPhysicalMaterial({ color: '#6c7076', metalness: 0.65, roughness: 0.28, clearcoat: 1, clearcoatRoughness: 0.08 }),
+        carPaint: new THREE.MeshPhysicalMaterial({ color: '#8c9399', metalness: 0.7, roughness: 0.26, clearcoat: 1, clearcoatRoughness: 0.06 }),
         carGlass: new THREE.MeshPhysicalMaterial({ color: '#1b2229', metalness: 0.2, roughness: 0.05, clearcoat: 1 }),
         rubber: std({ color: '#1a1a1b', roughness: 0.9 }),
         rim: std({ color: '#9da2a8', metalness: 1, roughness: 0.3 }),

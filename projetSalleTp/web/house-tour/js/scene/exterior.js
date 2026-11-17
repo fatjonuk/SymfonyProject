@@ -64,31 +64,41 @@ function car(parent, ctx) {
     const { M, reg } = ctx;
     const g = group('electric_car', parent);
     g.position.set(-9.4, G, -0.9);
-    const W = 1.82;
+    const W = 1.84;
     // side profile in the (z, y) plane, front towards -z
-    const profile = [
-        [2.3, 0.34], [2.33, 0.78], [2.18, 0.98], [1.7, 1.38], [-0.45, 1.44], [-1.2, 1.0],
-        [-2.12, 0.84], [-2.3, 0.62], [-2.28, 0.34],
-    ];
     const shape = new THREE.Shape();
-    profile.forEach(([z, y], i) => (i ? shape.lineTo(z, y) : shape.moveTo(z, y)));
+    shape.moveTo(2.32, 0.3);
+    shape.lineTo(2.37, 0.7);
+    shape.quadraticCurveTo(2.37, 0.97, 2.12, 1.02);
+    shape.quadraticCurveTo(1.82, 1.4, 1.2, 1.46);
+    shape.lineTo(-0.3, 1.47);
+    shape.quadraticCurveTo(-0.72, 1.46, -1.15, 1.06);
+    shape.quadraticCurveTo(-1.9, 0.97, -2.24, 0.84);
+    shape.quadraticCurveTo(-2.4, 0.72, -2.36, 0.5);
+    shape.lineTo(-2.3, 0.3);
     shape.closePath();
-    const bodyGeo = new THREE.ExtrudeGeometry(shape, { depth: W - 0.12, bevelEnabled: true, bevelThickness: 0.06, bevelSize: 0.06, bevelSegments: 4, curveSegments: 4 });
-    bodyGeo.translate(0, 0, -(W - 0.12) / 2);
+    const bodyGeo = new THREE.ExtrudeGeometry(shape, { depth: W - 0.2, bevelEnabled: true, bevelThickness: 0.1, bevelSize: 0.08, bevelSegments: 6, curveSegments: 12 });
+    bodyGeo.translate(0, 0, -(W - 0.2) / 2);
     const body = new THREE.Mesh(bodyGeo, M.carPaint);
     // ExtrudeGeometry: shape (x, y) extruded along z; rotate so shape x runs along world z
     body.rotation.y = -Math.PI / 2;
     body.castShadow = body.receiveShadow = true;
     g.add(body);
-    // glasshouse
+    // glasshouse: windscreen, side windows and rear window in one piece
     const glassShape = new THREE.Shape();
-    [[1.62, 1.33], [-0.4, 1.39], [-1.08, 1.0], [2.05, 0.99]].forEach(([z, y], i) => (i ? glassShape.lineTo(z, y) : glassShape.moveTo(z, y)));
+    glassShape.moveTo(2.02, 1.03);
+    glassShape.quadraticCurveTo(1.76, 1.38, 1.18, 1.425);
+    glassShape.lineTo(-0.28, 1.435);
+    glassShape.quadraticCurveTo(-0.68, 1.425, -1.06, 1.07);
     glassShape.closePath();
-    const glassGeo = new THREE.ExtrudeGeometry(glassShape, { depth: W + 0.005, bevelEnabled: false });
-    glassGeo.translate(0, 0, -(W + 0.005) / 2);
+    const glassGeo = new THREE.ExtrudeGeometry(glassShape, { depth: W - 0.02, bevelEnabled: false, curveSegments: 12 });
+    glassGeo.translate(0, 0, -(W - 0.02) / 2);
     const glass = new THREE.Mesh(glassGeo, M.carGlass);
     glass.rotation.y = -Math.PI / 2;
     g.add(glass);
+    // black lower cladding and pillar
+    for (const side of [-1, 1]) boxC(g, M.rubber, 0.02, 0.12, 3.9, side * (W / 2 + 0.005), 0.38, 0.0, { cast: false });
+    boxC(g, M.carGlass, W - 0.01, 0.34, 0.08, 0, 1.2, 0.35, { cast: false });
     // wheels
     for (const wz of [-1.42, 1.38]) {
         for (const side of [-1, 1]) {
@@ -99,8 +109,8 @@ function car(parent, ctx) {
         }
     }
     // lights
-    boxC(g, M.headLight, 1.3, 0.05, 0.05, 0, 0.76, -2.3, { cast: false });
-    boxC(g, M.tailLight, 1.5, 0.06, 0.05, 0, 0.86, 2.31, { cast: false });
+    boxC(g, M.headLight, 1.4, 0.04, 0.06, 0, 0.8, -2.33, { cast: false });
+    boxC(g, M.tailLight, 1.6, 0.05, 0.06, 0, 0.88, 2.38, { cast: false });
     // charging port (right rear fender) and cable to the wall charger
     const port = new THREE.MeshStandardMaterial({ color: '#111', emissive: '#4cd987', emissiveIntensity: 0.2 });
     boxC(g, port, 0.02, 0.07, 0.1, W / 2 + 0.01, 0.86, 1.75, { cast: false });

@@ -108,7 +108,11 @@ export class CameraDirector {
         }
         const span = t[hi] - t[lo] || 1;
         const i = lo + (target - t[lo]) / span;
-        return leg.u0 + ((leg.u1 - leg.u0) * i) / (t.length - 1);
+        const arcU = leg.u0 + ((leg.u1 - leg.u0) * i) / (t.length - 1);
+        // Half arc length, half point index: turns on the spot between close
+        // via points get time, instead of being squeezed into a whip pan.
+        const indexU = leg.u0 + (leg.u1 - leg.u0) * frac;
+        return arcU * 0.5 + indexU * 0.5;
     }
 
     /** Leg index and local progress (0-1) for a tour position p (0 = start, legs.length = end). */
