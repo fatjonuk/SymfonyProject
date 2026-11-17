@@ -930,3 +930,8 @@
         animation: none;
     }
 }
+
+/* ?clean=1 — scene only, used to render the illustrated views */
+.tour--clean .tour-stage > :not(.tour-canvas):not(.tour-loader) {
+    display: none !important;
+}

@@ -45,7 +45,7 @@ export class ScrollTour {
             animation: tl,
             anticipatePin: 1,
             snap: new URLSearchParams(window.location.search).get('snap') === '0' ? false : {
-                snapTo: 'labelsDirectional',
+                snapTo: 'labels',
                 duration: { min: 0.35, max: 1.2 },
                 delay: 0.15,
                 ease: 'power1.inOut',

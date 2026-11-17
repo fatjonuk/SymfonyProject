@@ -51,6 +51,9 @@ async function boot() {
     if (!window.gsap || !window.ScrollTrigger || !window.ScrollToPlugin) return staticMode('GSAP non chargé');
 
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    // ?clean=1: centred framing and no interface (used to render the illustrated views)
+    const clean = new URLSearchParams(window.location.search).get('clean') === '1';
+    if (clean) root.classList.add('tour--clean');
     const quality = detectQuality();
     const canvas = root.querySelector('[data-tour-canvas]');
     const stageEl = root.querySelector('[data-tour-stage]');
@@ -174,8 +177,8 @@ async function boot() {
         camera.fov = aspect < 1.25 ? Math.min(76, pose.fov * Math.pow(1.25 / aspect, 0.6)) : pose.fov;
         const desktop = size.w >= 1024;
         const finalOn = stop === stepsCount + 1;
-        const tx = desktop ? -0.13 * size.w : 0;
-        const ty = desktop ? 0 : panel > 0 || finalOn ? 0.17 * size.h : p < 1.3 ? -0.1 * size.h : 0.08 * size.h;
+        const tx = clean ? 0 : desktop ? -0.13 * size.w : 0;
+        const ty = clean || desktop ? 0 : panel > 0 || finalOn ? 0.17 * size.h : p < 1.3 ? -0.1 * size.h : 0.08 * size.h;
         const k = reduced ? 1 : 0.08;
         offset.x += (tx - offset.x) * k;
         offset.y += (ty - offset.y) * k;

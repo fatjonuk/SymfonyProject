@@ -109,8 +109,10 @@ function car(parent, ctx) {
         }
     }
     // lights
-    boxC(g, M.headLight, 1.4, 0.04, 0.06, 0, 0.8, -2.33, { cast: false });
-    boxC(g, M.tailLight, 1.6, 0.05, 0.06, 0, 0.88, 2.38, { cast: false });
+    boxC(g, M.headLight, 1.4, 0.04, 0.03, 0, 0.8, -2.43, { cast: false });
+    boxC(g, M.tailLight, 1.62, 0.05, 0.03, 0, 0.9, 2.47, { cast: false });
+    boxC(g, M.rubber, 1.7, 0.16, 0.04, 0, 0.42, 2.45, { cast: false });
+    boxC(g, M.deviceWhite, 0.52, 0.11, 0.01, 0, 0.62, 2.465, { cast: false });
     // charging port (right rear fender) and cable to the wall charger
     const port = new THREE.MeshStandardMaterial({ color: '#111', emissive: '#4cd987', emissiveIntensity: 0.2 });
     boxC(g, port, 0.02, 0.07, 0.1, W / 2 + 0.01, 0.86, 1.75, { cast: false });

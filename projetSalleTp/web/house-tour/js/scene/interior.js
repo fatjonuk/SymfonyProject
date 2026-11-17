@@ -105,7 +105,23 @@ function livingRoom(parent, ctx) {
     cyl(g, lampShade, 0.17, 0.17, 0.01, -2.4, 1.52, 0.55, 24, { cast: false });
     cyl(g, M.metalBlack, 0.16, 0.16, 0.02, -2.4, 0.01, 0.55);
     plant(g, M, 2.55, 0, 3.6, 1.6);
-    reg.living = { tvScreen, ledStrip, lampShade };
+    // table lamp on the console, plugged into the outlet below (lights up on step 2)
+    const tableLamp = ledMaterial('#ffd59a', 0);
+    cyl(g, M.ceramic, 0.07, 0.1, 0.22, -1.82, 0.54, -3.98, 24);
+    tableLamp.side = THREE.DoubleSide;
+    cyl(g, tableLamp, 0.13, 0.17, 0.2, -1.82, 0.75, -3.98, 32, { open: true });
+    boxC(g, M.deviceWhite, 0.045, 0.055, 0.035, -2.4, 0.3, -4.155);
+    const cord = new THREE.CatmullRomCurve3([
+        new THREE.Vector3(-2.4, 0.28, -4.14),
+        new THREE.Vector3(-2.33, 0.02, -4.1),
+        new THREE.Vector3(-2.14, 0.012, -4.12),
+        new THREE.Vector3(-2.06, 0.2, -4.15),
+        new THREE.Vector3(-1.9, 0.45, -4.12),
+        new THREE.Vector3(-1.84, 0.46, -4.02),
+    ]);
+    const cordMesh = new THREE.Mesh(new THREE.TubeGeometry(cord, 40, 0.005, 6), M.deviceWhite);
+    g.add(cordMesh);
+    reg.living = { tvScreen, ledStrip, lampShade, tableLamp };
     return g;
 }
 

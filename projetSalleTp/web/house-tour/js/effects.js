@@ -195,6 +195,7 @@ export class TourEffects {
         living.ledStrip.emissiveIntensity = Math.max(0.15, indirect * 3.2) * userSalon;
         living.lampShade.emissiveIntensity = salonLevel(this.salonCount) * 2.2 * userSalon;
         living.tvScreen.emissiveIntensity = 0.5 * Math.max(wPrises, wLum);
+        living.tableLamp.emissiveIntensity = 1.6 * Math.max(ss(0.2, 1, wPrises), wLum * BASE);
 
         for (const light of stage.roomLights) {
             const room = light.userData.room;

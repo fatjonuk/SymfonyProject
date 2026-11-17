@@ -90,10 +90,10 @@ steps:
             via:
                 - { position: [-4.65, 1.6, 2.95], target: [-3.0, 1.4, 2.75] }
                 - { position: [-3.5, 1.6, 2.75], target: [-2.0, 0.9, -1.0] }
-                - { position: [-2.7, 1.4, 0.4], target: [-2.2, 0.6, -4.0] }
-            position: [-1.75, 1.2, -1.35]
-            target: [-2.25, 0.4, -4.19]
-            fov: 56
+                - { position: [-2.7, 1.45, 0.4], target: [-2.0, 0.8, -4.0] }
+            position: [-1.45, 0.95, -2.55]
+            target: [-2.15, 0.4, -4.19]
+            fov: 52
         hotspots:
             - { id: hs-prise-salon, label: 'Prise de courant', circuit: prises-salon, position: [-2.4, 0.3, -4.15], text: 'Prise murale avec terre, positionnée près du meuble pour éviter les rallonges.' }
             - { id: hs-prise-tv, label: 'Prises multimédia', circuit: prises-salon, position: [-0.3, 0.3, -4.15], text: 'Derrière le meuble TV : énergie et réseau regroupés pour les équipements multimédia.' }

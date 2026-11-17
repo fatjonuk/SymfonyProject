@@ -77,7 +77,7 @@ export function createStage(canvas, quality) {
         const target = new THREE.WebGLRenderTarget(1, 1, { type: THREE.HalfFloatType, samples: 4 });
         composer = new EffectComposer(renderer, target);
         composer.addPass(new RenderPass(scene, camera));
-        bloom = new UnrealBloomPass(new THREE.Vector2(1, 1), 0.32, 0.55, 0.92);
+        bloom = new UnrealBloomPass(new THREE.Vector2(1, 1), 0.22, 0.5, 1.4);
         composer.addPass(bloom);
         composer.addPass(new OutputPass());
     }
