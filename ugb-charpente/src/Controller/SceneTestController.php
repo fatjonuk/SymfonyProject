@@ -20,4 +20,11 @@ final class SceneTestController extends AbstractController
     {
         return $this->render('test/maison.html.twig');
     }
+
+    /** Page de test de l'animation au scroll (étape 2). */
+    #[Route('/test/scroll', name: 'test_scroll')]
+    public function scroll(): Response
+    {
+        return $this->render('test/scroll.html.twig');
+    }
 }

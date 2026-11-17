@@ -307,11 +307,14 @@ function construireCouverture(M, qualite) {
             });
         });
 
-        const rives = [];
-        for (let i = 0; i < T.rangs; i++) {
-            for (const s of [-1, 1]) rives.push({ p: new THREE.Vector3(s * Lr / 2, yTuile, zHautRang(i)), rx: -inclinaisonTuile, sx: s, teinte: 0.85 });
-        }
-        pan.add(instances(`rives_${nom}`, geoRive, M.tuile, rives, cat));
+        // Rives : un lot par côté de pignon, pour pouvoir les écarter séparément
+        [[-1, 'a'], [1, 'b']].forEach(([s, suffixe]) => {
+            const rives = [];
+            for (let i = 0; i < T.rangs; i++) rives.push({ p: new THREE.Vector3(s * Lr / 2, yTuile, zHautRang(i)), rx: -inclinaisonTuile, sx: s, teinte: 0.85 });
+            const lot = instances(`rives_${nom}_${suffixe}`, geoRive, M.tuile, rives, cat);
+            lot.userData.cote = s;
+            pan.add(lot);
+        });
         g.add(pan);
     }
 

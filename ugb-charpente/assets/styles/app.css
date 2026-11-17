@@ -95,3 +95,58 @@ a { color: inherit; }
     .barre__etiquette { display: none; }
     .panneau-test { top: auto; bottom: 0; right: 0; left: 0; width: auto; max-height: 55%; border-radius: var(--rayon) var(--rayon) 0 0; }
 }
+
+/* ---------- Page à défilement : séquence 3D épinglée ---------- */
+.page-defilement { height: auto; }
+html:has(.page-defilement) { height: auto; }
+.barre--flottante { position: fixed; top: 0; left: 0; right: 0; z-index: 10; background: transparent; color: var(--bleu-nuit); pointer-events: none; }
+.barre--flottante a { pointer-events: auto; }
+.barre--flottante .barre__marque strong { color: #B88A00; }
+
+.experience { position: relative; height: 100vh; height: 100svh; overflow: hidden; background: var(--fond); }
+.experience__canvas { display: block; width: 100%; height: 100%; }
+.experience__repli { position: absolute; inset: 0; display: grid; place-items: center; padding: 72px 16px 16px; }
+.experience__repli[hidden] { display: none; }
+.experience__repli img { max-height: 100%; width: auto; }
+
+.phases { position: absolute; left: clamp(20px, 6vw, 96px); bottom: clamp(48px, 14vh, 140px); width: min(30rem, 38vw); z-index: 2; pointer-events: none; }
+.phases::before { content: ""; position: absolute; left: -120px; right: -90px; bottom: -110px; height: 360px; background: radial-gradient(closest-side, rgba(247, 246, 242, .94) 55%, rgba(247, 246, 242, 0)); }
+.phase { position: absolute; left: 0; bottom: 0; width: 100%; }
+.phase__numero { margin: 0 0 12px; font-size: .85rem; font-weight: 600; letter-spacing: .12em; color: #8A6800; display: flex; align-items: center; gap: 12px; }
+.phase__numero::after { content: ""; width: 48px; height: 2px; background: var(--jaune); }
+.phase__titre { margin: 0; font-size: clamp(1.6rem, 2.6vw, 2.6rem); line-height: 1.15; font-weight: 700; color: var(--bleu-nuit); text-wrap: balance; }
+.phase__texte { margin: 12px 0 0; font-size: clamp(1rem, 1.3vw, 1.25rem); color: var(--texte-doux); }
+
+.etapes { position: absolute; right: 24px; top: 50%; transform: translateY(-50%); z-index: 2; margin: 0; padding: 0; list-style: none; display: grid; gap: 10px; }
+.etapes li { width: 4px; height: 28px; border-radius: 4px; background: var(--trait); transition: background .3s, height .3s; }
+.etapes li.est-active { background: var(--jaune); height: 44px; }
+
+.invite { position: absolute; left: 50%; bottom: 20px; transform: translateX(-50%); z-index: 2; margin: 0; font-size: .8rem; letter-spacing: .08em; text-transform: uppercase; color: var(--texte-doux); display: flex; flex-direction: column; align-items: center; gap: 6px; transition: opacity .3s; }
+.invite span { width: 1px; height: 28px; background: var(--bleu-nuit); opacity: .5; }
+.invite.est-masque { opacity: 0; }
+
+.mesure { position: absolute; top: 64px; right: 44px; z-index: 2; margin: 0; padding: 8px 12px; font-size: .75rem; background: rgba(255, 255, 255, .9); border: 1px solid var(--trait); border-radius: 10px; min-width: 210px; }
+.mesure[hidden] { display: none; }
+.mesure div { display: flex; justify-content: space-between; gap: 12px; }
+.mesure dt { color: var(--texte-doux); }
+.mesure dd { margin: 0; font-weight: 600; font-variant-numeric: tabular-nums; }
+
+.suite { max-width: 46rem; margin: 0 auto; padding: 96px 24px 160px; }
+.suite h2 { margin: 0 0 12px; font-size: 1.6rem; }
+.suite p { color: var(--texte-doux); }
+
+/* Sans WebGL : pas de séquence épinglée, les textes s'enchaînent normalement */
+.experience.sans-3d { height: auto; overflow: visible; }
+.sans-3d .experience__repli { position: static; display: block; padding-top: 88px; text-align: center; }
+.sans-3d .experience__repli img { max-height: 70vh; }
+.sans-3d .phases { position: static; width: auto; max-width: 46rem; margin: 0 auto; padding: 24px; display: grid; gap: 40px; }
+.sans-3d .phase { position: static; opacity: 1 !important; visibility: visible !important; transform: none !important; }
+.sans-3d .etapes, .sans-3d .invite, .sans-3d .phases::before { display: none; }
+
+@media (max-width: 800px), (orientation: portrait) {
+    .phases { left: 20px; right: 20px; width: auto; bottom: 96px; }
+    .phases::before { left: -20px; right: -20px; bottom: -96px; height: 320px; background: linear-gradient(to top, rgba(247, 246, 242, .96) 60%, rgba(247, 246, 242, 0)); }
+    .phase__titre { font-size: 1.5rem; }
+    .etapes { right: 10px; }
+    .mesure { top: 60px; right: 24px; left: auto; min-width: 0; font-size: .7rem; }
+}

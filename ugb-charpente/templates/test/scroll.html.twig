@@ -1,0 +1,72 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Animation au scroll — page de test | UGB Charpente{% endblock %}
+
+{% block importmap %}{{ importmap(['app', 'scene-scroll']) }}{% endblock %}
+
+{% block body_class %}page-defilement{% endblock %}
+
+{% block body %}
+<header class="barre barre--flottante">
+    <a class="barre__marque" href="{{ path('accueil') }}">
+        <img src="{{ asset('images/logo/logo-ugb-charpente.svg') }}" alt="" width="40" height="40">
+        <span>UGB <strong>Charpente</strong></span>
+    </a>
+    <span class="barre__etiquette">Page de test · Étape 2</span>
+</header>
+
+<main>
+    <section class="experience" id="experience" aria-label="Découverte de la maison en 3D">
+        <canvas id="scene-canvas" class="experience__canvas" aria-hidden="true"></canvas>
+
+        <div id="repli" class="experience__repli" hidden>
+            <img src="{{ asset('images/maison-poster.webp') }}" alt="Maison de plain-pied avec toiture en tuiles, bardage bois, terrasse et abri bois." width="1600" height="900">
+        </div>
+        <noscript>
+            <div class="experience__repli">
+                <img src="{{ asset('images/maison-poster.webp') }}" alt="Maison de plain-pied avec toiture en tuiles, bardage bois, terrasse et abri bois." width="1600" height="900">
+            </div>
+        </noscript>
+
+        <div class="phases">
+            <article class="phase" data-phase="1">
+                <p class="phase__numero">01</p>
+                <h1 class="phase__titre">La solidité commence par une structure bien pensée.</h1>
+            </article>
+            <article class="phase" data-phase="2">
+                <p class="phase__numero">02</p>
+                <h2 class="phase__titre">Couverture et zinguerie</h2>
+                <p class="phase__texte">Une protection durable.</p>
+            </article>
+            <article class="phase" data-phase="3">
+                <p class="phase__numero">03</p>
+                <h2 class="phase__titre">Charpente traditionnelle</h2>
+                <p class="phase__texte">Le savoir-faire au cœur de votre toiture.</p>
+            </article>
+        </div>
+
+        <ol class="etapes" aria-hidden="true"><li></li><li></li><li></li></ol>
+        <p class="invite" id="invite" aria-hidden="true">Faites défiler <span></span></p>
+
+        <div id="chargement" class="chargement" role="status" aria-live="polite">
+            <img src="{{ asset('images/logo/logo-ugb-charpente.svg') }}" alt="" width="96" height="96">
+            <p class="chargement__titre">UGB <strong>Charpente</strong></p>
+            <div class="chargement__barre"><span id="chargement-jauge"></span></div>
+            <p id="chargement-texte" class="chargement__texte">Préparation de la scène…</p>
+        </div>
+
+        <dl class="mesure" id="mesure" hidden>
+            <div><dt>Progression</dt><dd id="m-progression">0 %</dd></div>
+            <div><dt>Phase</dt><dd id="m-phase">1</dd></div>
+            <div><dt>Fluidité</dt><dd id="m-fps" title="Cliquer pour remettre le minimum à zéro">—</dd></div>
+            <div><dt>Qualité</dt><dd id="m-qualite">—</dd></div>
+        </dl>
+    </section>
+
+    <section class="suite">
+        <h2>Suite de la page</h2>
+        <p>Fin de la séquence 3D de l'étape 2. Les phases 4 et 5 (bardage, vue éclatée complète, mode exploration) puis le reste du site viendront ici. En remontant, la maison se réassemble.</p>
+        <p><a href="?reduit=1">Version « mouvement réduit »</a> · <a href="?qualite=basse">Qualité allégée</a> · <a href="?qualite=haute">Qualité haute</a> · <a href="?repli=1">Repli sans 3D</a> · <a href="{{ path('test_maison') }}">Maison seule (étape 1)</a></p>
+    </section>
+</main>
+{% endblock %}

@@ -15,6 +15,16 @@ return [
         'path' => './assets/scene/page-test.js',
         'entrypoint' => true,
     ],
+    'scene-scroll' => [
+        'path' => './assets/scene/page-scroll.js',
+        'entrypoint' => true,
+    ],
+    'gsap' => [
+        'path' => './assets/lib/gsap/gsap.min.js',
+    ],
+    'gsap/ScrollTrigger' => [
+        'path' => './assets/lib/gsap/ScrollTrigger.min.js',
+    ],
     'three' => [
         'path' => './assets/lib/three/three.module.min.js',
     ],

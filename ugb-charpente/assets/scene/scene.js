@@ -28,7 +28,8 @@ const imageSuivante = () => new Promise((r) => requestAnimationFrame(() => r()))
 /**
  * Construit la scène dans `canvas`. `progression(fraction, libellé)` est appelé à chaque étape.
  */
-export async function creerScene(canvas, progression = () => {}) {
+export async function creerScene(canvas, progression = () => {}, options = {}) {
+    const libre = options.controles !== false;   // false : caméra pilotée par la timeline de scroll
     const qualite = choisirQualite();
     const renderer = new THREE.WebGLRenderer({ canvas, antialias: qualite.antialias, powerPreference: 'high-performance' });
     renderer.setPixelRatio(Math.min(devicePixelRatio, qualite.dprMax));
@@ -83,36 +84,44 @@ export async function creerScene(canvas, progression = () => {}) {
         maison.add(g);
     }
 
-    // --- Contrôles (page de test : rotation et zoom libres) ---
-    const controles = new OrbitControls(camera, canvas);
-    controles.target.copy(cible);
-    controles.enableDamping = true;
-    controles.dampingFactor = 0.08;
-    controles.minDistance = 6;
-    controles.maxDistance = 120;
-    controles.maxPolarAngle = Math.PI / 2 - 0.03;
+    // --- Contrôles (rotation et zoom libres ; désactivés quand le scroll pilote la caméra) ---
+    let controles = null;
+    if (libre) {
+        controles = new OrbitControls(camera, canvas);
+        controles.target.copy(cible);
+        controles.enableDamping = true;
+        controles.dampingFactor = 0.08;
+        controles.minDistance = 6;
+        controles.maxDistance = 120;
+        controles.maxPolarAngle = Math.PI / 2 - 0.03;
+    }
 
     // --- Rendu à la demande ---
     let demande = true, horloge = 0, images = 0, auto = null;
-    const rendre = () => { demande = true; };
+    let ombresCharpenteForcees = null, apresRedimension = null;
+    const rendre = (ombres = false) => { demande = true; if (ombres) renderer.shadowMap.needsUpdate = true; };
     const majOmbres = () => {
         // Tant que la couverture est en place, la charpente (cachée dessous) ne projette pas d'ombre : moins d'appels de dessin
-        const visible = !groupes.couverture.visible;
+        const visible = ombresCharpenteForcees ?? !groupes.couverture.visible;
         groupes.charpente.traverse((o) => { if (o.isMesh) o.castShadow = visible; });
         renderer.shadowMap.needsUpdate = true;
         rendre();
     };
-    controles.addEventListener('change', rendre);
+    if (controles) controles.addEventListener('change', () => rendre());
 
     // Cadrage automatique : la maison entière reste visible quel que soit le format d'écran,
     // tant que le visiteur n'a pas pris la main sur la caméra.
     const direction = camera.position.clone().sub(cible).normalize();
     let aBouge = false;
-    controles.addEventListener('start', () => { aBouge = true; });
-    function cadrer() {
+    if (controles) controles.addEventListener('start', () => { aBouge = true; });
+    /** Distance à laquelle la maison entière tient dans le cadre (dépend du format d'écran). */
+    function distanceCadrage() {
         const v = THREE.MathUtils.degToRad(camera.fov) / 2, h = Math.atan(Math.tan(v) * camera.aspect);
-        const d = Math.max(12.5 / Math.sin(h), 7.5 / Math.sin(v));
-        camera.position.copy(cible).addScaledVector(direction, d);
+        return Math.max((camera.aspect < 1 ? 10 : 12.5) / Math.sin(h), 7.5 / Math.sin(v));
+    }
+    function cadrer() {
+        camera.position.copy(cible).addScaledVector(direction, distanceCadrage());
+        camera.lookAt(cible);
     }
     function redimensionner() {
         const w = canvas.clientWidth, h = canvas.clientHeight;
@@ -121,6 +130,7 @@ export async function creerScene(canvas, progression = () => {}) {
         camera.aspect = w / h;
         camera.updateProjectionMatrix();
         if (!aBouge) cadrer();
+        if (apresRedimension) apresRedimension();
         rendre();
     }
     new ResizeObserver(redimensionner).observe(canvas);
@@ -129,7 +139,7 @@ export async function creerScene(canvas, progression = () => {}) {
     function boucle(t) {
         requestAnimationFrame(boucle);
         if (auto) { auto(t); demande = true; }
-        if (controles.update() || demande) {
+        if ((controles && controles.update()) || demande) {
             demande = false;
             renderer.render(scene, camera);
             images++;
@@ -144,11 +154,12 @@ export async function creerScene(canvas, progression = () => {}) {
     /** Fait tourner la caméra pendant `duree` ms en rendant chaque image, et renvoie les FPS moyens. */
     function mesurerFps(duree = 5000) {
         return new Promise((resolve) => {
-            const debut = performance.now(), depart = images, az0 = controles.getAzimuthalAngle();
+            const debut = performance.now(), depart = images, az0 = Math.atan2(camera.position.x - cible.x, camera.position.z - cible.z);
             const rayon = Math.hypot(camera.position.x - cible.x, camera.position.z - cible.z), y = camera.position.y;
             auto = () => {
                 const e = performance.now() - debut, a = az0 + (e / duree) * Math.PI * 2;
                 camera.position.set(cible.x + Math.sin(a) * rayon, y, cible.z + Math.cos(a) * rayon);
+                camera.lookAt(cible);
                 if (e >= duree) { auto = null; resolve(Math.round(((images - depart) / e) * 1000)); }
             };
         });
@@ -162,5 +173,11 @@ export async function creerScene(canvas, progression = () => {}) {
         return { triangles: renderer.info.render.triangles, appels: renderer.info.render.calls, objets: nommes, qualite: qualite.nom };
     }
 
-    return { renderer, scene, camera, controles, maison, groupes, materiaux, qualite, rendre, majOmbres, mesurerFps, statistiques, DIMENSIONS };
+    return {
+        renderer, scene, camera, soleil, controles, maison, groupes, materiaux, qualite, cible, DIMENSIONS,
+        rendre, majOmbres, mesurerFps, statistiques, distanceCadrage,
+        imagesRendues: () => images,
+        forcerOmbresCharpente: (v) => { if (ombresCharpenteForcees !== v) { ombresCharpenteForcees = v; majOmbres(); } },
+        surRedimension: (f) => { apresRedimension = f; },
+    };
 }

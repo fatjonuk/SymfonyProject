@@ -15,6 +15,8 @@ php -S 127.0.0.1:8000 -t public public/index.php
 
 Puis ouvrir <http://127.0.0.1:8000/test/maison> (page de test de la maison 3D).
 
+Animation au scroll (étape 2) : <http://127.0.0.1:8000/test/scroll>, options `?reduit=1`, `?qualite=…`, `?repli=1`.
+
 Options d'URL de la page de test : `?qualite=haute`, `?qualite=basse`, `?repli=1` (image statique sans WebGL).
 
 ## Organisation
@@ -23,7 +25,9 @@ Options d'URL de la page de test : `?qualite=haute`, `?qualite=basse`, `?repli=1
 - `assets/scene/maison.js` — géométrie procédurale : structure, charpente, couverture, zinguerie, bardage, terrasse, abri.
 - `assets/scene/materiaux.js` — matériaux PBR, textures générées par code.
 - `assets/scene/scene.js` — rendu, lumières, ombres, niveaux de qualité, cadrage.
+- `assets/scene/animation.js` — timeline GSAP ScrollTrigger (phases 1 à 3), version « mouvement réduit ».
+- `assets/scene/page-scroll.js` — page épinglée au scroll, textes, indicateur de fluidité.
 - `assets/scene/page-test.js` — écran de chargement, repli sans WebGL, outils de test.
-- `assets/lib/` — Three.js (MIT), versionné dans le dépôt (pas de CDN).
+- `assets/lib/` — Three.js (MIT) et GSAP + ScrollTrigger (licence standard gratuite GSAP), versionnés dans le dépôt (pas de CDN).
 - `assets/fonts/` — Poppins (licence OFL), auto-hébergée.
 - `assets/images/logo/` — logo vectorisé à partir du visuel fourni.
