@@ -17,6 +17,7 @@
             <li>{{ detail }}</li>
         {% endfor %}
     </ul>
+    <button class="tour-panel__readmore" type="button" data-action="details" data-step-id="{{ step.id }}" aria-label="Lire la suite : {{ step.title }}" data-js-only>Lire la suite</button>
 
     {% if step.action == 'lights' %}
         <div class="tour-panel__controls" data-js-only>

@@ -267,6 +267,28 @@
 .tour-panel__more-static {
     display: none;
 }
+/* "Lire la suite": only on compact screens, see the media query below */
+.tour-panel__readmore {
+    display: none;
+    align-items: center;
+    min-height: 44px;
+    margin: 2px 0 -8px;
+    padding: 0;
+    border: 0;
+    background: none;
+    font: inherit;
+    font-size: 0.86rem;
+    font-weight: 800;
+    color: var(--night);
+    text-decoration: underline;
+    text-decoration-color: var(--volt);
+    text-decoration-thickness: 2px;
+    text-underline-offset: 4px;
+    cursor: pointer;
+}
+.tour-sheet__body .tour-panel__details {
+    margin-top: 12px;
+}
 .tour-slider {
     display: flex;
     flex: 1;
@@ -732,12 +754,7 @@
         font-size: 0.95rem;
     }
     .tour-intro__hint {
-        position: fixed;
-        left: 50%;
-        bottom: calc(22px + var(--safe-b));
-        transform: translateX(-50%);
-        margin: 0;
-        white-space: nowrap;
+        margin-top: 18px;
     }
     .tour-panels {
         left: 10px;
@@ -762,8 +779,23 @@
     .tour-panel__desc {
         font-size: 0.9rem;
     }
-    .tour-panel__details li {
-        font-size: 0.84rem;
+    /* compact panels in the 3D tour: title, hook, short description and action;
+       the full description and the key points open in the sheet ("Lire la suite").
+       The static version (no WebGL / no JavaScript) keeps everything inline. */
+    .js .tour:not(.tour--static) .tour-panel .tour-panel__details {
+        display: none;
+    }
+    .js .tour:not(.tour--static) .tour-panel .tour-panel__desc {
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+    .js .tour:not(.tour--static) .tour-panel__readmore {
+        display: inline-flex;
+    }
+    .tour-panel__controls {
+        margin-top: 14px;
     }
     .tour-final {
         left: var(--gutter);
@@ -790,7 +822,15 @@
     .tour-final__actions .tour-btn {
         flex: 1 1 auto;
     }
-    /* compact horizontal step indicator under the header */
+    /* compact horizontal step indicator under the header, hidden on the opening view */
+    .is-intro .tour-rail {
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.5s var(--ease), visibility 0s linear 0.5s;
+    }
+    .tour-rail__counter {
+        white-space: nowrap;
+    }
     .tour-rail {
         top: calc(var(--header-h) - 2px);
         right: 50%;

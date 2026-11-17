@@ -77,8 +77,12 @@ export class TourUI {
         this.intro.style.transform = window.innerWidth >= 1024 ? `translateY(calc(-46% - ${((1 - introK) * 30).toFixed(1)}px))` : `translateY(${(-(1 - introK) * 20).toFixed(1)}px)`;
         this.intro.style.visibility = introK < 0.01 ? 'hidden' : 'visible';
 
+        this.stage.classList.toggle('is-intro', p < 1.15);
         if (panel !== this.activePanel) {
-            this.panels.forEach((el, i) => el.classList.toggle('is-active', i + 1 === panel));
+            this.panels.forEach((el, i) => {
+                el.classList.toggle('is-active', i + 1 === panel);
+                if (i + 1 === panel) el.scrollTop = 0;
+            });
             this.activePanel = panel;
             if (panel > 0) {
                 const step = this.config.steps[panel - 1];
@@ -191,6 +195,23 @@ export class TourUI {
                 const slider = this.root.querySelector('[data-action="lights-dim"]');
                 if (slider && on && Number(slider.value) === 0) slider.value = 100;
                 this.emit('lights-dim', on ? Number(slider ? slider.value : 100) / 100 : 0);
+                break;
+            }
+            case 'details': {
+                // compact screens: full description and key points of the step
+                const panel = el.closest('[data-panel]');
+                const wrap = document.createElement('div');
+                const tag = document.createElement('p');
+                tag.className = 'tour-sheet__tag';
+                tag.textContent = this.config.steps[Number(panel.dataset.panel) - 1].nav;
+                const title = document.createElement('h3');
+                title.id = 'tour-sheet-title';
+                title.textContent = panel.querySelector('.tour-panel__title').textContent;
+                const desc = document.createElement('p');
+                desc.textContent = panel.querySelector('.tour-panel__desc').textContent;
+                const list = panel.querySelector('.tour-panel__details').cloneNode(true);
+                wrap.append(tag, title, desc, list);
+                this.openSheet(wrap, el);
                 break;
             }
             case 'restart':

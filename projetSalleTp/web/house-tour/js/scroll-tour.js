@@ -44,14 +44,38 @@ export class ScrollTour {
             scrub: this.reduced ? true : 0.8,
             animation: tl,
             anticipatePin: 1,
+            // Soft stabilisation: only when the visitor stops close to a stop.
+            // Elsewhere the camera stays where the scroll left it, so slow
+            // scrolling (or short swipes on a phone) always moves forward.
             snap: new URLSearchParams(window.location.search).get('snap') === '0' ? false : {
-                snapTo: 'labels',
-                duration: { min: 0.35, max: 1.2 },
-                delay: 0.15,
+                snapTo: (value) => this.softSnap(value),
+                duration: { min: 0.3, max: 0.9 },
+                delay: 0.2,
                 ease: 'power1.inOut',
+                inertia: false,
             },
         });
         return this;
+    }
+
+    /** Progress (0-1) of the closest stop if it is near enough, otherwise the value itself. */
+    softSnap(value) {
+        const st = this.trigger;
+        const tl = this.timeline;
+        if (!st || !tl) return value;
+        const distance = st.end - st.start;
+        const reach = window.innerHeight * 0.32;
+        let best = value;
+        let bestGap = Infinity;
+        for (const label of Object.values(tl.labels)) {
+            const progress = label / this.total;
+            const gap = Math.abs(progress - value) * distance;
+            if (gap < bestGap) {
+                bestGap = gap;
+                best = progress;
+            }
+        }
+        return bestGap <= reach ? best : value;
     }
 
     get p() {
