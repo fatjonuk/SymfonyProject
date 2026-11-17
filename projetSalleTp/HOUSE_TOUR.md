@@ -35,12 +35,22 @@ php bin/console server:run  # http://127.0.0.1:8000
 Sous Windows (PowerShell ou cmd), les commandes sont les mêmes. Si `php` n’est pas reconnu,
 ajouter le dossier de PHP au `PATH`, ou lancer `C:\chemin\vers\php.exe bin\console server:run`.
 
-Sans `server:run`, le serveur intégré de PHP suffit :
+`server:run` lance l’environnement **dev** (barre de débogage Symfony en bas de page).
+
+### Environnement prod en local, et test sur téléphone
+
+`web/app_dev.php` refuse volontairement les requêtes qui passent par un proxy ou un tunnel
+(cloudflared, ngrok… : erreur 403). Pour ouvrir le site depuis un téléphone, utiliser
+l’environnement prod avec le routeur fourni :
 
 ```bash
-php -S 127.0.0.1:8000 -t web web/app_dev.php   # environnement dev
-php -S 127.0.0.1:8001 -t web web/app.php       # environnement prod
+php bin/console cache:clear --env=prod --no-debug
+php -S 127.0.0.1:8000 -t web app/router_prod.php
+cloudflared tunnel --url http://127.0.0.1:8000     # dans un second terminal
 ```
+
+`app/router_prod.php` sert les fichiers de `web/` tels quels et envoie le reste à `web/app.php`.
+Après une modification de configuration ou de gabarit, relancer `cache:clear --env=prod`.
 
 ### Installer ou mettre à jour les dépendances
 
@@ -66,7 +76,7 @@ php bin/console assets:install web --symlink --relative
 php bin/console cache:clear --env=prod --no-debug
 ```
 
-puis servir `web/` avec `web/app.php` comme contrôleur frontal.
+puis servir `web/` avec `web/app.php` comme contrôleur frontal (Apache, Nginx + PHP-FPM…).
 
 ---
 
