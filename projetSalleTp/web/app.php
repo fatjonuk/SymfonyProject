@@ -1,5 +1,9 @@
 <?php
 
+// Production: never print PHP notices into the page (old vendor code on PHP 8)
+ini_set('display_errors', '0');
+error_reporting(E_ALL & ~E_DEPRECATED & ~E_USER_DEPRECATED);
+
 use Symfony\Component\HttpFoundation\Request;
 
 require __DIR__.'/../vendor/autoload.php';
