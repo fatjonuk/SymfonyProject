@@ -173,7 +173,7 @@ export function buildExterior(root, ctx) {
     tree(garden, M, -10.8, -7.2, 1.05);
     tree(garden, M, 13.5, 9.5, 0.95);
     tree(garden, M, 12.8, -5.5, 1.15);
-    tree(garden, M, -14.5, 9.5, 0.9);
+    tree(garden, M, -17.5, -2.5, 0.9);
 
     carport(ext, ctx);
     car(ext, ctx);

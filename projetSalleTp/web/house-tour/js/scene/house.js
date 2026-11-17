@@ -230,6 +230,22 @@ export function buildHouse(root, ctx) {
     }
     box(roofPivot, M.concrete, 15.6, 0.02, 8.3, 0.75, top, -0.45, { cast: false });
 
+    // photovoltaic array: 2 rows of 8 panels, tilted towards the sun
+    const pv = group('solar_panels', roofPivot);
+    for (let row = 0; row < 2; row++) {
+        for (let i = 0; i < 8; i++) {
+            const g = group('pv_module', pv);
+            g.position.set(-1.6 + i * 1.12, top + 0.34, -3.05 + row * 1.95);
+            g.rotation.x = -0.2;
+            boxC(g, M.pv, 1.06, 0.04, 1.74, 0, 0, 0);
+            boxC(g, M.steel, 1.09, 0.025, 1.77, 0, -0.03, 0, { cast: false });
+            for (let k = 1; k < 3; k++) boxC(g, M.steel, 1.06, 0.002, 0.012, 0, 0.022, -0.87 + (1.74 * k) / 3, { cast: false });
+            boxC(g, M.metalBlack, 0.05, 0.3, 0.05, 0, -0.2, -0.75);
+            boxC(g, M.metalBlack, 0.05, 0.45, 0.05, 0, -0.27, 0.75);
+        }
+    }
+    ctx.reg.solarPanels = pv;
+
     return { house, ground, upper, roof: roofPivot, entrance };
 }
 

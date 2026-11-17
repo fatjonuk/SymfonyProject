@@ -247,9 +247,10 @@ function towelRadiator(parent, ctx) {
     }
     // thermostat box and towels
     boxC(g, M.deviceWhite, 0.07, 0.12, 0.05, 0.3, 0.42, 0.06);
-    const t1 = boxC(g, M.towel, 0.4, 0.5, 0.03, -0.02, 1.32, 0.12);
-    t1.rotation.x = 0.02;
-    boxC(g, M.towelLight, 0.34, 0.36, 0.03, 0.03, 0.82, 0.12);
+    // towels folded over a bar (front and back halves)
+    boxC(g, M.towel, 0.36, 0.42, 0.012, -0.02, 1.36, 0.115);
+    boxC(g, M.towel, 0.36, 0.3, 0.012, -0.02, 1.42, 0.065);
+    boxC(g, M.towelLight, 0.3, 0.3, 0.012, 0.03, 0.86, 0.115);
     // subtle heat shimmer in front of the bars (shader plane)
     const heat = new THREE.ShaderMaterial({
         uniforms: { uTime: { value: 0 }, uAmount: { value: 0 } },

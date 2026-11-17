@@ -55,8 +55,8 @@ steps:
             duration: 3.2
             via:
                 - { position: [-9.0, 3.2, 14.0], target: [-4.85, 1.9, 4.3] }
-                - { position: [-4.85, 1.65, 8.2], target: [-4.85, 1.55, 3.0] }
-                - { position: [-4.85, 1.6, 4.35], target: [-5.25, 1.5, 1.5] }
+                - { position: [-4.78, 1.65, 8.2], target: [-4.8, 1.55, 3.0] }
+                - { position: [-4.7, 1.6, 4.35], target: [-5.25, 1.5, 1.5] }
             position: [-5.4, 1.55, 2.62]
             target: [-5.62, 1.45, 1.33]
             fov: 50
@@ -90,13 +90,13 @@ steps:
             via:
                 - { position: [-4.65, 1.6, 2.95], target: [-3.0, 1.4, 2.75] }
                 - { position: [-3.5, 1.6, 2.75], target: [-2.0, 0.9, -1.0] }
-                - { position: [-2.95, 1.35, 0.0], target: [-2.4, 0.5, -4.0] }
-            position: [-2.85, 0.95, -2.5]
-            target: [-2.35, 0.33, -4.19]
-            fov: 52
+                - { position: [-2.7, 1.4, 0.4], target: [-2.2, 0.6, -4.0] }
+            position: [-1.75, 1.2, -1.35]
+            target: [-2.25, 0.4, -4.19]
+            fov: 56
         hotspots:
-            - { id: hs-prise-salon, label: 'Prise de courant', position: [-2.4, 0.3, -4.15], text: 'Prise murale avec terre, positionnée près du meuble pour éviter les rallonges.' }
-            - { id: hs-prise-tv, label: 'Prises multimédia', position: [-0.3, 0.3, -4.15], text: 'Derrière le meuble TV : énergie et réseau regroupés pour les équipements multimédia.' }
+            - { id: hs-prise-salon, label: 'Prise de courant', circuit: prises-salon, position: [-2.4, 0.3, -4.15], text: 'Prise murale avec terre, positionnée près du meuble pour éviter les rallonges.' }
+            - { id: hs-prise-tv, label: 'Prises multimédia', circuit: prises-salon, position: [-0.3, 0.3, -4.15], text: 'Derrière le meuble TV : énergie et réseau regroupés pour les équipements multimédia.' }
 
     -   id: lumieres
         nav: 'Lumières'
@@ -120,9 +120,9 @@ steps:
             target: [-1.4, 2.25, 1.15]
             fov: 60
         hotspots:
-            - { id: hs-spots, label: 'Spots encastrés', position: [0.0, 2.95, -2.0], text: 'Spots LED encastrés au plafond : un éclairage général homogène, sans éblouissement.' }
+            - { id: hs-spots, label: 'Spots encastrés', circuit: salon-eclairage, position: [0.0, 2.95, -2.0], text: 'Spots LED encastrés au plafond : un éclairage général homogène, sans éblouissement.' }
             - { id: hs-ruban, label: 'Éclairage indirect', position: [-0.3, 1.62, -4.08], text: 'Un ruban LED derrière l’écran crée un éclairage d’ambiance doux, par réflexion sur le mur.' }
-            - { id: hs-inter, label: 'Interrupteur', position: [-3.42, 1.15, 1.95], text: 'Commande des spots du salon. Elle peut être associée à un variateur.' }
+            - { id: hs-inter, label: 'Interrupteur', circuit: salon-eclairage, position: [-3.42, 1.15, 1.95], text: 'Commande des spots du salon. Elle peut être associée à un variateur.' }
             - { id: hs-lampadaire, label: 'Lampadaire', position: [-2.4, 1.65, 0.55], text: 'Un point lumineux d’appoint, branché sur une prise, pour la lecture ou la détente.' }
 
     -   id: cuisine
@@ -148,12 +148,12 @@ steps:
                 position: [5.25, 1.62, 0.55]
                 target: [5.35, 1.0, -3.2]
         hotspots:
-            - { id: hs-four, label: 'Four', position: [5.75, 1.15, -3.58], text: 'Le four dispose de son propre circuit, indépendant des prises du plan de travail.' }
-            - { id: hs-plaque, label: 'Plaque de cuisson', position: [5.3, 0.95, -1.2], text: 'Appareil de forte puissance : il est alimenté par un circuit spécialisé, dimensionné selon le modèle installé.' }
-            - { id: hs-lave-vaisselle, label: 'Lave-vaisselle', position: [4.55, 0.55, -3.55], text: 'Un circuit dédié, avec une protection adaptée à un appareil qui associe eau et électricité.' }
-            - { id: hs-frigo, label: 'Réfrigérateur', position: [6.4, 1.3, -3.58], text: 'Il fonctionne en permanence : sa prise est accessible et placée sur un circuit adapté.' }
-            - { id: hs-prises-pdt, label: 'Prises du plan de travail', position: [3.75, 1.1, -4.15], text: 'Des prises au-dessus du plan de travail, à distance de l’évier, pour le petit électroménager.' }
-            - { id: hs-led-meubles, label: 'Éclairage sous meubles', position: [4.4, 1.43, -3.95], text: 'Un ruban LED sous les meubles hauts éclaire directement le plan de travail.' }
+            - { id: hs-four, label: 'Four', circuit: four, position: [5.75, 1.15, -3.56], text: 'Le four dispose de son propre circuit, indépendant des prises du plan de travail.' }
+            - { id: hs-plaque, label: 'Plaque de cuisson', circuit: plaque, position: [5.3, 0.95, -1.2], text: 'Appareil de forte puissance : il est alimenté par un circuit spécialisé, dimensionné selon le modèle installé.' }
+            - { id: hs-lave-vaisselle, label: 'Lave-vaisselle', circuit: lave-vaisselle, position: [4.55, 0.5, -3.55], text: 'Un circuit dédié, avec une protection adaptée à un appareil qui associe eau et électricité.' }
+            - { id: hs-frigo, label: 'Réfrigérateur', circuit: prises-cuisine, position: [6.38, 1.3, -3.56], text: 'Il fonctionne en permanence : sa prise est accessible et placée sur un circuit adapté.' }
+            - { id: hs-prises-pdt, label: 'Prises du plan de travail', circuit: prises-cuisine, position: [3.75, 1.1, -4.15], text: 'Des prises au-dessus du plan de travail, à distance de l’évier, pour le petit électroménager.' }
+            - { id: hs-led-meubles, label: 'Éclairage sous meubles', circuit: cuisine-eclairage, position: [4.4, 1.43, -3.95], text: 'Un ruban LED sous les meubles hauts éclaire directement le plan de travail.' }
 
     -   id: seche-serviettes
         nav: 'Sèche-serviettes'
@@ -185,12 +185,12 @@ steps:
                 - { position: [-6.15, 4.85, 0.45], target: [-4.6, 4.85, 0.55] }
                 - { position: [-4.95, 4.88, 0.5], target: [-4.25, 4.8, 3.0] }
                 - { position: [-4.25, 4.85, 1.25], target: [-5.8, 4.55, 2.3] }
-            position: [-4.3, 4.75, 1.95]
-            target: [-6.62, 4.25, 2.35]
-            fov: 55
+            position: [-4.1, 4.8, 2.05]
+            target: [-6.62, 4.3, 2.5]
+            fov: 60
         hotspots:
-            - { id: hs-seche, label: 'Sèche-serviettes', position: [-6.6, 4.4, 2.35], text: 'Radiateur sèche-serviettes électrique, avec thermostat et programmation selon le modèle.' }
-            - { id: hs-miroir, label: 'Miroir lumineux', position: [-3.3, 4.55, 1.3], text: 'Un éclairage adapté aux pièces humides, autour du miroir et au plafond.' }
+            - { id: hs-seche, label: 'Sèche-serviettes', circuit: seche, position: [-6.55, 4.55, 2.35], text: 'Radiateur sèche-serviettes électrique, avec thermostat et programmation selon le modèle.' }
+            - { id: hs-miroir, label: 'Miroir lumineux', position: [-3.3, 4.85, 1.32], text: 'Un éclairage adapté aux pièces humides, autour du miroir et au plafond.' }
 
     -   id: solaire
         nav: 'Panneaux solaires'
@@ -217,13 +217,13 @@ steps:
             via:
                 - { position: [-4.55, 6.0, 2.05], target: [-4.4, 8.3, 4.6] }
                 - { position: [-3.6, 7.8, 5.6], target: [0.0, 7.5, 9.5] }
-                - { position: [-0.5, 9.6, 10.6], target: [2.0, 6.6, -1.0] }
-            position: [7.2, 13.6, 10.6]
-            target: [2.3, 6.6, -1.7]
+                - { position: [1.0, 10.5, 12.5], target: [2.0, 6.4, -1.0] }
+            position: [11.5, 15.5, 16.0]
+            target: [1.8, 5.2, -1.4]
             fov: 40
         hotspots:
             - { id: hs-pv, label: 'Panneaux photovoltaïques', position: [2.3, 7.0, -1.9], text: 'Ils convertissent une partie de la lumière du soleil en électricité (courant continu).' }
-            - { id: hs-pv-cable, label: 'Liaison vers l’onduleur', position: [-6.95, 5.2, 0.9], text: 'Le courant produit descend jusqu’à l’onduleur, installé dans l’entrée à côté du tableau électrique.' }
+            - { id: hs-pv-cable, label: 'Liaison vers l’onduleur', circuit: pv, position: [-7.15, 4.2, -1.9], text: 'Le courant produit descend jusqu’à l’onduleur, installé dans l’entrée à côté du tableau électrique.' }
 
     -   id: borne
         nav: 'Borne électrique'
@@ -249,14 +249,14 @@ steps:
         camera:
             duration: 2.6
             via:
-                - { position: [0.5, 9.2, 15.0], target: [-5.0, 2.2, 4.0] }
-                - { position: [-8.0, 3.4, 10.6], target: [-7.3, 1.2, 2.4] }
-            position: [-9.25, 1.5, 7.3]
-            target: [-7.35, 1.05, 2.3]
+                - { position: [2.0, 10.0, 18.0], target: [-5.0, 2.2, 4.0] }
+                - { position: [-7.6, 3.4, 10.4], target: [-7.3, 1.1, 0.0] }
+            position: [-9.0, 1.5, 6.6]
+            target: [-7.35, 1.0, -0.2]
             fov: 46
         hotspots:
-            - { id: hs-borne, label: 'Borne de recharge', position: [-7.12, 1.25, 2.2], text: 'Borne murale raccordée au tableau par un circuit dédié et protégé.' }
-            - { id: hs-cable, label: 'Câble de recharge', position: [-8.1, 0.75, 2.75], text: 'Le câble relie la borne à la prise de recharge du véhicule.' }
+            - { id: hs-borne, label: 'Borne de recharge', circuit: borne, position: [-7.16, 1.15, -0.2], text: 'Borne murale raccordée au tableau par un circuit dédié et protégé.' }
+            - { id: hs-cable, label: 'Câble de recharge', position: [-7.95, 0.12, 0.35], text: 'Le câble relie la borne à la prise de recharge du véhicule.' }
 
 final:
     title: 'Une maison, des installations essentielles.'
